@@ -49,6 +49,8 @@ static int cmd_c(char *args) {
 
 
 static int cmd_q(char *args) {
+  printf("%s-NEMU: has a good night!\n", ANSI_FMT(str(__GUEST_ISA__), ANSI_FG_YELLOW ANSI_BG_RED));
+  nemu_state.state = NEMU_QUIT;
   return -1;
 }
 
