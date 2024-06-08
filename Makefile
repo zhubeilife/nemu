@@ -13,6 +13,17 @@
 # See the Mulan PSL v2 for more details.
 #**************************************************************************************/
 
+# !!! hack only
+ifeq ($(strip $(shell uname -s)), Darwin) # Darwin, Linux
+  ifndef NEMU_HOME
+    NEMU_HOME := $(CURDIR)
+    $(info !!! make cur dir as NEMU_HOME)
+  endif
+endif
+
+all: run
+# !!! end of hack only
+
 # Sanity check
 ifeq ($(wildcard $(NEMU_HOME)/src/nemu-main.c),)
   $(error NEMU_HOME=$(NEMU_HOME) is not a NEMU repo)
