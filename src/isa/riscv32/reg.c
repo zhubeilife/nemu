@@ -16,6 +16,23 @@
 #include <isa.h>
 #include "local-include/reg.h"
 
+/*
++-----------+---------------+-------------------------+--------------------------+
+|   Name    |  ABI Mnemonic |         Meaning         |  Preserved across calls? |
++-----------+---------------+-------------------------+--------------------------+
+| x0        |  zero         |  Zero                   |   —(Immutable)           |
+| x1        |  ra           |  Return address         |  No                      |
+| x2        |  sp           |  Stack pointer          |  Yes                          |
+| x3        |  gp           |  Global pointer         |   — (Unallocatable)      |
+| x4        |  tp           |  Thread pointer         |   — (Unallocatable)      |
+| x5 - x7   |  t0 - t2      |  Temporary registers    |  No                      |
+| x8 - x9   |  s0 - s1      |  Callee-saved registers |  Yes                     |
+| x10 - x17 |  a0 - a7      |  Argument registers     |  No                      |
+| x18 - x27 |  s2 - s11     |  Callee-saved registers |  Yes                     |
+| x28 - x31 |  t3 - t6      |  Temporary registers    |  No                      |
++-----------+---------------+-------------------------+--------------------------+
+*/
+
 const char *regs[] = {
   "$0", "ra", "sp", "gp", "tp", "t0", "t1", "t2",
   "s0", "s1", "a0", "a1", "a2", "a3", "a4", "a5",
@@ -24,6 +41,13 @@ const char *regs[] = {
 };
 
 void isa_reg_display() {
+  printf("regs:\n");
+  printf("(%s: " FMT_WORD  ")  ", "pc", cpu.pc);
+  for (int i = 0; i < MUXDEF(CONFIG_RVE, 16, 32); i++)
+  {
+    printf("(%s: " FMT_WORD ")  ", regs[i], cpu.gpr[i]);
+  }
+  printf("\n");
 }
 
 word_t isa_reg_str2val(const char *s, bool *success) {

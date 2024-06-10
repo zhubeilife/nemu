@@ -35,8 +35,11 @@
 #define PMEM64 1
 #endif
 
+// 表示与ISA字长等长的无符号类型, 在32位的ISA中为uint32_t, 在64位的ISA中为uint64_t.
 typedef MUXDEF(CONFIG_ISA64, uint64_t, uint32_t) word_t;
+// 表示与ISA字长等长的有符号类型, 在32位的ISA中为int32_t, 在64位的ISA中为int64_t.
 typedef MUXDEF(CONFIG_ISA64, int64_t, int32_t)  sword_t;
+// word_t类型对应的十六进制格式化说明符, 在32位的ISA中为"0x%08x", 在64位的ISA中为"0x%016lx".
 #define FMT_WORD MUXDEF(CONFIG_ISA64, "0x%016" PRIx64, "0x%08" PRIx32)
 
 typedef word_t vaddr_t;

@@ -42,16 +42,77 @@ static char* rl_gets() {
   return line_read;
 }
 
+//  继续运行被暂停的程序
 static int cmd_c(char *args) {
   cpu_exec(-1);
   return 0;
 }
 
-
 static int cmd_q(char *args) {
   printf("%s-NEMU: has a good night!\n", ANSI_FMT(str(__GUEST_ISA__), ANSI_FG_YELLOW ANSI_BG_RED));
   nemu_state.state = NEMU_QUIT;
   return -1;
+}
+
+// 单步执行, si [N] 让程序单步执行N条指令后暂停执行,当N没有给出时, 缺省为1
+static int cmd_si(char *args) {
+  uint64_t step = 1;
+  /* extract the first argument */
+  char *arg = strtok(NULL, " ");
+  if (arg != NULL) {
+    // or use sscanf(arg, "%d", &step);
+    step = atoi(arg);
+  }
+  cpu_exec(step);
+  return 0;
+}
+
+// 打印程序状态, info SUBCMD,	info r: 打印寄存器状态, info w: 打印监视点
+static int cmd_info(char *args) {
+  /* extract the first argument */
+  char *arg = strtok(NULL, " ");
+  if (arg == NULL)
+  {
+    printf("Please Give subcmd, r for regs, w for watch point\n");
+  }
+  else if (strcmp(arg, "r") == 0)
+  {
+    isa_reg_display();
+  }
+  else if (strcmp(arg, "w") == 0)
+  {
+    printf("Sorry waiting implemention!\n");
+  }
+  else
+  {
+    printf("Unknown command '%s'\n", arg);
+  }
+
+  return 0;
+}
+
+// 扫描内存, x N EXPR, x 10 $esp	求出表达式EXPR的值, 将结果作为起始内存地址, 以十六进制形式输出连续的N个4字节
+static int cmd_x(char *args) {
+
+  return 0;
+}
+
+// 表达式求值, p EXPR,	p $eax + 1	求出表达式EXPR的值, EXPR支持的运算请见调试中的表达式求值小节
+static int cmd_p(char *args) {
+
+  return 0;
+}
+
+// 设置监视点,	w EXPR	w *0x2000,	当表达式EXPR的值发生变化时, 暂停程序执行
+static int cmd_w(char *args) {
+
+  return 0;
+}
+
+// 删除监视点, d N,	d 2	删除序号为N的监视点
+static int cmd_d(char *args) {
+
+  return 0;
 }
 
 static int cmd_help(char *args);
@@ -64,9 +125,12 @@ static struct {
   { "help", "Display information about all supported commands", cmd_help },
   { "c", "Continue the execution of the program", cmd_c },
   { "q", "Exit NEMU", cmd_q },
-
-  /* TODO: Add more commands */
-
+  { "si", "Step Instruction", cmd_si },
+  { "info", "Infomation", cmd_info },
+  { "x", "Examines the data located in memory at address", cmd_x },
+  { "p", "Prints the value which the indicated expression evaluates to as a hexadecimal number", cmd_p },
+  { "w", "Add Watch Point", cmd_w },
+  { "d", "Delte Watch Point", cmd_d },
 };
 
 #define NR_CMD ARRLEN(cmd_table)
