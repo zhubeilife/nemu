@@ -98,3 +98,9 @@ nemu
     ├── qemu-diff
     └── spike-diff
 ```
+
+## Hint
+
++ 存储器是个在nemu/src/memory/paddr.c中定义的大数组
++ PC和通用寄存器都在nemu/src/isa/$ISA/include/isa-def.h中的结构体中定义
++ TRM的工作方式通过cpu_exec()和exec_once()体现

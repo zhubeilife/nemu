@@ -19,6 +19,8 @@
 #include <readline/history.h>
 #include "sdb.h"
 
+#include <memory/paddr.h>
+
 static int is_batch_mode = false;
 
 void init_regex();
@@ -63,6 +65,8 @@ static int cmd_si(char *args) {
     // or use sscanf(arg, "%d", &step);
     step = atoi(arg);
   }
+  // TODO(attention here)
+  // NEMU默认会把单步执行的指令打印出来(这里面埋了一些坑, 你需要RTFSC看看指令是在哪里被打印的), 这样你就可以验证单步执行的效果了.
   cpu_exec(step);
   return 0;
 }
@@ -81,6 +85,7 @@ static int cmd_info(char *args) {
   }
   else if (strcmp(arg, "w") == 0)
   {
+    // TODO: implement
     printf("Sorry waiting implemention!\n");
   }
   else
@@ -93,6 +98,36 @@ static int cmd_info(char *args) {
 
 // 扫描内存, x N EXPR, x 10 $esp	求出表达式EXPR的值, 将结果作为起始内存地址, 以十六进制形式输出连续的N个4字节
 static int cmd_x(char *args) {
+  /* extract the first argument */
+  char *arg_size = strtok(NULL, " ");
+  if (arg_size == NULL)
+  {
+    printf("Please Give size and expr\n");
+    return 0;
+  }
+  int size = atoi(arg_size);
+  if (size <= 0)
+  {
+    printf("Please Give right size\n");
+    return 0;
+  }
+
+  char *arg_expr = strtok(NULL, " ");
+  // TODO(now just think expr is just a int)
+  int base_addr = strtol(arg_expr, NULL, 16);
+
+  if (!in_pmem(base_addr) || !in_pmem(base_addr + 4*size))
+  {
+    printf("Memroy add is out of boundry\n");
+    return 0;
+  }
+
+  printf("memory from %x to %x\n", base_addr, base_addr + 4*size);
+  for (int i = 0; i < size; i++)
+  {
+    printf(FMT_WORD "  ", paddr_read(base_addr + 4*i, 4));
+  }
+  printf("\n");
 
   return 0;
 }
