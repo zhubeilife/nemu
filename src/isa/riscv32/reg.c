@@ -50,6 +50,7 @@ void isa_reg_display() {
   printf("\n");
 }
 
+// 若存在名称为name的寄存器, 则返回其当前值, 并设置success为true; 否则设置success为false.
 word_t isa_reg_str2val(const char *s, bool *success) {
   return 0;
 }
