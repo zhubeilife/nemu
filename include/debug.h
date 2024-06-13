@@ -24,6 +24,9 @@
     _Log(ANSI_FMT("[%s:%d %s] " format, ANSI_FG_BLUE) "\n", \
         __FILE__, __LINE__, __func__, ## __VA_ARGS__)
 
+// avoid #define paste strange bugs
+// gcc use () to avoid this issue
+// #define assert(cond) ({ ... })
 #define Assert(cond, format, ...) \
   do { \
     if (!(cond)) { \
