@@ -27,6 +27,8 @@
 
 // calculate the length of an array
 #define ARRLEN(arr) (int)(sizeof(arr) / sizeof(arr[0]))
+#define FIELD_SIZEOF(t, f) (sizeof(((t*)0)->f))
+#define FIELD_ARRLEN_SIZEOF(t, f) (int)(sizeof(((t*)0)->f) / sizeof(((t*)0)->f[0]) )
 
 // macro concatenation
 #define concat_temp(x, y) x ## y

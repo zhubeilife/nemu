@@ -104,3 +104,14 @@ nemu
 + 存储器是个在nemu/src/memory/paddr.c中定义的大数组
 + PC和通用寄存器都在nemu/src/isa/$ISA/include/isa-def.h中的结构体中定义
 + TRM的工作方式通过cpu_exec()和exec_once()体现
+
+## Machine 
+
++ The machine is always right. (机器永远是对的)
+  - Corollary: If the program does not produce the desired output, it is the programmer's fault.
++ Every line of untested code is always wrong. (未测试代码永远是错的)
+  - Corollary: Mistakes are likely to appear in the "must-be-correct" code.
++  系统设计的黄金法则 -- KISS法则
+  - 这里的KISS是Keep It Simple, Stupid的缩写, 它的中文翻译是: 不要在一开始追求绝对的完美.
+  - 唯一可以把你从bug的混沌中拯救出来的就是KISS法则, 它的宗旨是从易到难, 逐步推进, 一次只做一件事, 少做无关的事. 
+  - 这些教训也让我不断地去思考为什么要用KISS原则。慢慢地我体会到，KISS原则目的其实是——“快速推进、逐步优化”。我们设计一个算法，往往可以在大脑中预先思考好，然后直接编程写出来。但是，我们设计实现一个系统，当系统的复杂度超出我们大脑的工作记忆容量时，就无法在大脑中去“模拟”每一个细节。此时，我们应该用最快的速度去把系统建起了，然后再对各个环节进行优化。 (https://blog.sciencenet.cn/blog-414166-562616.html)

@@ -134,7 +134,14 @@ static int cmd_x(char *args) {
 
 // 表达式求值, p EXPR,	p $eax + 1	求出表达式EXPR的值, EXPR支持的运算请见调试中的表达式求值小节
 static int cmd_p(char *args) {
+  if (args == NULL)
+  {
+    printf("Please Give Right Expr!\n");
+    return 0;
+  }
 
+  bool ret;
+  expr(args, &ret);
   return 0;
 }
 

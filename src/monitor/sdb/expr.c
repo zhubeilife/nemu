@@ -20,24 +20,24 @@
  */
 #include <regex.h>
 
+// here a clever choice to let TK_NOTYPE from 256 to avoid
+// conflict with asic charater
 enum {
-  TK_NOTYPE = 256, TK_EQ,
-
-  /* TODO: Add more token types */
-
+  TK_NOTYPE = 256, TK_EQ, TK_DEC_NUM
 };
 
 static struct rule {
   const char *regex;
   int token_type;
 } rules[] = {
-
-  /* TODO: Add more rules.
-   * Pay attention to the precedence level of different rules.
-   */
-
   {" +", TK_NOTYPE},    // spaces
   {"\\+", '+'},         // plus
+  {"-", '-'},           // minus
+  {"\\*", '*'},         // multi
+  {"\\/", '/'},         // sub
+  {"\\(", '('},         // left bracket
+  {"\\)", ')'},         // right bracket
+  {"[[:digit:]]+", TK_DEC_NUM},         // dec number
   {"==", TK_EQ},        // equal
 };
 
@@ -64,10 +64,12 @@ void init_regex() {
 
 typedef struct token {
   int type;
-  char str[32];
+  char str[32];   // TODO: str成员的长度是有限的, 当你发现缓冲区将要溢出的时候, 要进行相应的处理(思考一下, 你会如何进行处理?)
 } Token;
 
+// tokens数组用于按顺序存放已经被识别出的token信息
 static Token tokens[32] __attribute__((used)) = {};
+// nr_token指示已经被识别出的token数目.
 static int nr_token __attribute__((used))  = 0;
 
 static bool make_token(char *e) {
@@ -89,13 +91,22 @@ static bool make_token(char *e) {
 
         position += substr_len;
 
-        /* TODO: Now a new token is recognized with rules[i]. Add codes
-         * to record the token in the array `tokens'. For certain types
-         * of tokens, some extra actions should be performed.
-         */
-
         switch (rules[i].token_type) {
-          default: TODO();
+          case TK_NOTYPE:
+            break;
+          default:
+            if (substr_len > FIELD_ARRLEN_SIZEOF(Token, str) - 1)
+            {
+              Assert(0, "sub str is too large with: len: %d: %.*s", substr_len, substr_len, substr_start);
+            }
+            if (nr_token < ARRLEN(tokens))
+            {
+              tokens[nr_token].type = rules[i].token_type;
+              memcpy(tokens[nr_token].str, substr_start, substr_len);
+              tokens[nr_token].str[substr_len] = '\0';
+              nr_token++;
+            }
+            break;
         }
 
         break;
@@ -119,7 +130,7 @@ word_t expr(char *e, bool *success) {
   }
 
   /* TODO: Insert codes to evaluate the expression. */
-  TODO();
+  //TODO();
 
   return 0;
 }
