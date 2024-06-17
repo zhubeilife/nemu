@@ -122,15 +122,195 @@ static bool make_token(char *e) {
   return true;
 }
 
+bool check_inter_parentehese(int start, int end)
+{
+  // generate the array
+  int parent_arry[ARRLEN(tokens)] = {};
+  int left_parent = 0;
+  int right_parent = 0;
+  for (int i = start; i <= end; i++)
+  {
+    int op_type = tokens[i].type;
+    if (op_type == ')' || op_type == '(')
+    {
+      op_type == '(' ? left_parent++ : right_parent++;
+      parent_arry[i] = op_type;
+    }
+    else
+    {
+      // just use TK_NOTYPE as ident
+      parent_arry[i] = TK_NOTYPE;
+    }
+  }
+
+  // before start there should be same
+  if (left_parent != right_parent)
+  {
+    return false;
+  }
+  else if (left_parent == 0)
+  {
+    return true;
+  }
+
+  // check left ones
+  bool find_pair = false;
+  do
+  {
+    find_pair = false;
+    for (int i = start; i <= end; i++)
+    {
+      if (parent_arry[i] == '(')
+      {
+        for(int j = i + 1; j <= end; j++)
+        {
+          if (parent_arry[j] == '(')
+          {
+            break;
+          }
+          else if (parent_arry[j] == ')')
+          {
+            find_pair = true;
+            left_parent--;
+            parent_arry[i] = TK_NOTYPE;
+            parent_arry[j] = TK_NOTYPE;
+          }
+        }
+      }
+    }
+  } while (find_pair);
+
+  return left_parent == 0 ? true : false;
+}
+
+bool check_parentheses(int p, int q) {
+  // first the who exp is surround by ()
+  if (tokens[p].type != '(' || tokens[q].type != ')')
+  {
+    return false;
+  }
+
+  return check_inter_parentehese(p+1, q-1);
+}
+
+bool get_main_op(int p, int q, int *main_pos)
+{
+  int pos = p;
+  int type = TK_NOTYPE;
+
+  for (int i = p; i <= q; i++)
+  {
+    int op_type = tokens[i].type;
+    switch (op_type)
+    {
+      case '+':
+      case '-':
+        type = op_type;
+        pos = i;
+        break;
+      case '*':
+      case '/':
+        if (type != '+' && type != '-')
+        {
+          type = op_type;
+          pos = i;
+        }
+        break;
+      case '(':
+        // find coresponding ')'
+          int left_count = 1;
+          int right_count = 0;
+          for (int j = i+1; j <= q; j++)
+          {
+            int temp_token = tokens[j].type;
+            if (temp_token == '(')
+            {
+              left_count ++;
+            }
+            else if (temp_token == ')')
+            {
+              right_count++;
+            }
+            if (left_count == right_count)
+            {
+              i = j;
+              break;
+            }
+          }
+        break;
+      case ')':
+        // should not happend
+        Assert(0, "Should not happend");
+        return false;
+        break;
+    }
+  }
+
+  if (type == TK_NOTYPE)
+  {
+    printf("find no main op");
+    return false;
+  }
+
+  *main_pos = pos;
+  return true;
+}
+
+// TODO:
+// 1- how to deal when the calcuate is somethign rong
+word_t eval(int p, int q) {
+  if (p > q) {
+    /* Bad expression */
+    Assert(0, "Bad expression pos p: %d, q: %d", p, q);
+  }
+  else if (p == q) {
+    /* Single token.
+     * For now this token should be a number.
+     * Return the value of the number.
+     */
+    if (tokens[p].type == TK_DEC_NUM)
+    {
+      // TODO: here may not dec or the covert not success
+      return atoi(tokens[p].str);
+    }
+    else
+    {
+      Assert(0, "Expression is not a number with %s", tokens[p].str);
+    }
+  }
+  else if (check_parentheses(p, q)) {
+    /* The expression is surrounded by a matched pair of parentheses.
+     * If that is the case, just throw away the parentheses.
+     */
+    return eval(p + 1, q - 1);
+  }
+  else {
+    int main_pos = p;
+    if (get_main_op(p, q, &main_pos))
+    {
+      int op_type = tokens[main_pos].type;
+      word_t val1 = eval(p, main_pos - 1);
+      word_t val2 = eval(main_pos + 1, q);
+
+      switch (op_type) {
+        case '+': return val1 + val2;
+        case '-': return val1 - val2;
+        case '*': return val1 * val2;
+        case '/': return val1 / val2;
+        default: Assert(0, "Not support op type %s", tokens[main_pos].str);
+      }
+    }
+    else
+    {
+      Assert(0, "Can't get main op with p: %d, q: %d", p, q);
+    }
+  }
+}
 
 word_t expr(char *e, bool *success) {
   if (!make_token(e)) {
     *success = false;
     return 0;
   }
-
-  /* TODO: Insert codes to evaluate the expression. */
-  //TODO();
-
-  return 0;
+  return eval(0, nr_token - 1);
 }

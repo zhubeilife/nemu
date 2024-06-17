@@ -141,7 +141,9 @@ static int cmd_p(char *args) {
   }
 
   bool ret;
-  expr(args, &ret);
+  word_t result = expr(args, &ret);
+
+  printf("Result: %d\n", result);
   return 0;
 }
 
