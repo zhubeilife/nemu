@@ -12,4 +12,4 @@ include/config
 include/generated
 .idea
 .vscode
-!/test/test.txt
+test/test.txt
