@@ -193,6 +193,18 @@ bool check_parentheses(int p, int q) {
   return check_inter_parentehese(p+1, q-1);
 }
 
+bool check_negavitve(int p, int q)
+{
+  if ((q - p) == 1 && tokens[p].type == '-')
+  {
+    return true;
+  }
+  else
+  {
+    return false;
+  }
+}
+
 bool get_main_op(int p, int q, int *main_pos)
 {
   int pos = p;
@@ -203,10 +215,29 @@ bool get_main_op(int p, int q, int *main_pos)
     int op_type = tokens[i].type;
     switch (op_type)
     {
+      // not deal something like (+1) where + means positive
       case '+':
-      case '-':
         type = op_type;
         pos = i;
+        break;
+      case '-':
+        // to deal with '-' is neative or minus sign
+        // 1 + -1, 1 - -1, -1 + 1
+        if (type == TK_NOTYPE && pos == i)
+        {
+          // -1 + 1 situation
+          printf("get you");
+        }
+        else if (type != TK_NOTYPE && pos == (i - 1))
+        {
+          // 1 - - 1 situation
+          printf("get you");
+        }
+        else
+        {
+          type = op_type;
+          pos = i;
+        }
         break;
       case '*':
       case '/':
@@ -251,7 +282,7 @@ bool get_main_op(int p, int q, int *main_pos)
     printf("find no main op");
     return false;
   }
-
+  printf("debug: get main on %d %s\n", pos, tokens[pos].str);
   *main_pos = pos;
   return true;
 }
@@ -286,7 +317,11 @@ word_t eval(int p, int q) {
   }
   else {
     int main_pos = p;
-    if (get_main_op(p, q, &main_pos))
+    if (check_negavitve(p, q))
+    {
+      return -eval(q, q);
+    }
+    else if (get_main_op(p, q, &main_pos))
     {
       int op_type = tokens[main_pos].type;
       word_t val1 = eval(p, main_pos - 1);
