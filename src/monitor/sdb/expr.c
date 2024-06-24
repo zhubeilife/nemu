@@ -64,7 +64,8 @@ void init_regex() {
 
 typedef struct token {
   int type;
-  char str[32];   // TODO: str成员的长度是有限的, 当你发现缓冲区将要溢出的时候, 要进行相应的处理(思考一下, 你会如何进行处理?)
+  char str[32];   // TODO: str成员的长度是有限的, 当你发现缓冲区将要溢出的时候,
+                  // 要进行相应的处理(思考一下, 你会如何进行处理?)
 } Token;
 
 // tokens数组用于按顺序存放已经被识别出的token信息
@@ -205,6 +206,27 @@ bool check_negavitve(int p, int q)
   }
 }
 
+void show_debug_info(int p, int q)
+{
+  int size = 0;
+  int p_size = 0;
+  int q_size = 0;
+  for (int i = 0; i < nr_token; i++)
+  {
+    printf("%s ", tokens[i].str);
+    if (p == i) p_size = size;
+    if (q == i) q_size = size;
+    size += strlen(tokens[i].str) + 1;
+  }
+  printf("\n");
+  printf("%*c", p_size, ' ');
+  printf("^");
+  printf("%*c", q_size - p_size -1, ' ');
+  printf("^");
+  printf("\n");
+  printf("debug info p: %d, q: %d\n", p, q);
+}
+
 bool get_main_op(int p, int q, int *main_pos)
 {
   int pos = p;
@@ -271,6 +293,7 @@ bool get_main_op(int p, int q, int *main_pos)
         break;
       case ')':
         // should not happend
+        show_debug_info(p,q);
         Assert(0, "Should not happend");
         return false;
         break;

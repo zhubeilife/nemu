@@ -140,11 +140,37 @@ static int cmd_p(char *args) {
     return 0;
   }
 
+#if 1
+  // for test expr
+  char *arg_size = strtok(NULL, " ");
+  if (arg_size == NULL)
+  {
+    printf("Please Give size and expr\n");
+    return 0;
+  }
+  int input_result = atoi(arg_size);
+
+  char *expr_args = arg_size + strlen(arg_size) + 1;
+  bool ret;
+  word_t result = expr(expr_args, &ret);
+
+  if (result == input_result)
+  {
+    printf("right!\n");
+  }
+  else
+  {
+    printf("wrong!\n");
+  }
+  printf("Result: %d\n", result);
+  return 0;
+#elif
   bool ret;
   word_t result = expr(args, &ret);
 
   printf("Result: %d\n", result);
   return 0;
+#endif
 }
 
 // 设置监视点,	w EXPR	w *0x2000,	当表达式EXPR的值发生变化时, 暂停程序执行
