@@ -23,7 +23,7 @@
 // here a clever choice to let TK_NOTYPE from 256 to avoid
 // conflict with asic charater
 enum {
-  TK_NOTYPE = 256, TK_EQ, TK_DEC_NUM
+  TK_NOTYPE = 256, TK_EQ, TK_DEC_NUM, TK_HEX_NUM, TK_REG_NAME
 };
 
 static struct rule {
@@ -37,8 +37,10 @@ static struct rule {
   {"\\/", '/'},         // sub
   {"\\(", '('},         // left bracket
   {"\\)", ')'},         // right bracket
-  {"[[:digit:]]+", TK_DEC_NUM},         // dec number
   {"==", TK_EQ},        // equal
+  {"\\$\\$?[0-9A-Za-z]+", TK_REG_NAME},         // reg name
+  {"0[xX][0-9A-Fa-f]+", TK_HEX_NUM},        // hex number
+  {"[[:digit:]]+", TK_DEC_NUM},             // dec number
 };
 
 #define NR_REGEX ARRLEN(rules)
@@ -328,13 +330,29 @@ word_t eval(int p, int q, bool *success)
      * For now this token should be a number.
      * Return the value of the number.
      */
-    if (tokens[p].type == TK_DEC_NUM)
+    switch (tokens[p].type)
     {
-      // TODO: may support more types
-      return atoi(tokens[p].str);
-    }
-    else
-    {
+      // TODO: here not deal with if strol fail
+    case TK_HEX_NUM:
+      return strtol(tokens[p].str, NULL, 16);;
+      break;
+    case TK_DEC_NUM:
+      return strtol(tokens[p].str, NULL, 10);
+      break;
+    case TK_REG_NAME:
+      word_t reg_val = isa_reg_str2val(tokens[p].str + 1, success);
+      if (*success)
+      {
+        printf("temp" FMT_WORD, reg_val);
+        return reg_val;
+      }
+      else
+      {
+        printf("Can't get reg %s value", tokens[p].str + 1);
+        return 0;
+      }
+      break;
+    default:
       *success = false;
       printf("Expression is not a number with %s", tokens[p].str);
       return 0;

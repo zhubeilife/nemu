@@ -144,8 +144,9 @@ static int cmd_p(char *args) {
   bool ret;
   word_t result = expr(args, &ret);
 
-  printf("Result: %d\n", result);
+  printf("Result: %u\n", result);
   return 0;
+
 #else
   // for test expr
   char *arg_size = strtok(NULL, " ");
