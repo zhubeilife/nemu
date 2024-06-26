@@ -42,15 +42,28 @@ const char *regs[] = {
 
 void isa_reg_display() {
   printf("regs:\n");
-  printf("(%s: " FMT_WORD  ")  ", "pc", cpu.pc);
+  printf("(%3s: " FMT_WORD  " )  ", "pc", cpu.pc);
   for (int i = 0; i < MUXDEF(CONFIG_RVE, 16, 32); i++)
   {
-    printf("(%s: " FMT_WORD ")  ", regs[i], cpu.gpr[i]);
+    if (i % 4 == 0)
+    {
+      printf("\n");
+    }
+    printf("(%3s: " FMT_WORD " )  ", regs[i], cpu.gpr[i]);
   }
   printf("\n");
 }
 
 // 若存在名称为name的寄存器, 则返回其当前值, 并设置success为true; 否则设置success为false.
-word_t isa_reg_str2val(const char *s, bool *success) {
+word_t isa_reg_str2val(const char *name, bool *success) {
+  *success = false;
+  for(int i = 0; i < MUXDEF(CONFIG_RVE, 16, 32); i++)
+  {
+    if (strcmp(name, regs[i]) == 0)
+    {
+      *success = true;
+      return cpu.gpr[i];
+    }
+  }
   return 0;
 }
