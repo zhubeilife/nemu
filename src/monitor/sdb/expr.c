@@ -64,8 +64,7 @@ void init_regex() {
 
 typedef struct token {
   int type;
-  char str[32];   // TODO: str成员的长度是有限的, 当你发现缓冲区将要溢出的时候,
-                  // 要进行相应的处理(思考一下, 你会如何进行处理?)
+  char str[32];
 } Token;
 
 // tokens数组用于按顺序存放已经被识别出的token信息
@@ -106,6 +105,11 @@ static bool make_token(char *e) {
               memcpy(tokens[nr_token].str, substr_start, substr_len);
               tokens[nr_token].str[substr_len] = '\0';
               nr_token++;
+            }
+            else
+            {
+              printf("expr is large than %d\n", ARRLEN(tokens));
+              return false;
             }
             break;
         }
@@ -175,6 +179,7 @@ bool check_inter_parentehese(int start, int end)
             left_parent--;
             parent_arry[i] = TK_NOTYPE;
             parent_arry[j] = TK_NOTYPE;
+            break;
           }
         }
       }
@@ -211,6 +216,7 @@ void show_debug_info(int p, int q)
   int size = 0;
   int p_size = 0;
   int q_size = 0;
+  printf("\n");
   for (int i = 0; i < nr_token; i++)
   {
     printf("%s ", tokens[i].str);
@@ -303,16 +309,16 @@ bool get_main_op(int p, int q, int *main_pos)
   if (type == TK_NOTYPE)
   {
     printf("find no main op");
+    show_debug_info(p, q);
     return false;
   }
-  printf("debug: get main on %d %s\n", pos, tokens[pos].str);
+  // printf("debug: get main on %d %s\n", pos, tokens[pos].str);
   *main_pos = pos;
   return true;
 }
 
-// TODO:
-// 1- how to deal when the calcuate is somethign rong
-word_t eval(int p, int q) {
+word_t eval(int p, int q, bool *success)
+{
   if (p > q) {
     /* Bad expression */
     Assert(0, "Bad expression pos p: %d, q: %d", p, q);
@@ -324,31 +330,33 @@ word_t eval(int p, int q) {
      */
     if (tokens[p].type == TK_DEC_NUM)
     {
-      // TODO: here may not dec or the covert not success
+      // TODO: may support more types
       return atoi(tokens[p].str);
     }
     else
     {
-      Assert(0, "Expression is not a number with %s", tokens[p].str);
+      *success = false;
+      printf("Expression is not a number with %s", tokens[p].str);
+      return 0;
     }
   }
   else if (check_parentheses(p, q)) {
     /* The expression is surrounded by a matched pair of parentheses.
      * If that is the case, just throw away the parentheses.
      */
-    return eval(p + 1, q - 1);
+    return eval(p + 1, q - 1, success);
   }
   else {
     int main_pos = p;
     if (check_negavitve(p, q))
     {
-      return -eval(q, q);
+      return -eval(q, q, success);
     }
     else if (get_main_op(p, q, &main_pos))
     {
       int op_type = tokens[main_pos].type;
-      word_t val1 = eval(p, main_pos - 1);
-      word_t val2 = eval(main_pos + 1, q);
+      word_t val1 = eval(p, main_pos - 1, success);
+      word_t val2 = eval(main_pos + 1, q, success);
 
       switch (op_type) {
         case '+': return val1 + val2;
@@ -360,15 +368,20 @@ word_t eval(int p, int q) {
     }
     else
     {
-      Assert(0, "Can't get main op with p: %d, q: %d", p, q);
+      *success = false;
+      printf("Can't get main op with p: %d, q: %d", p, q);
+      return 0;
     }
   }
 }
 
 word_t expr(char *e, bool *success) {
+  // first set success is true, any thing wrong happend
+  // will set it to false
+  *success = true;
   if (!make_token(e)) {
     *success = false;
     return 0;
   }
-  return eval(0, nr_token - 1);
+  return eval(0, nr_token - 1, success);
 }

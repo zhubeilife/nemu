@@ -140,7 +140,13 @@ static int cmd_p(char *args) {
     return 0;
   }
 
-#if 1
+#ifndef TEST_EXPR
+  bool ret;
+  word_t result = expr(args, &ret);
+
+  printf("Result: %d\n", result);
+  return 0;
+#else
   // for test expr
   char *arg_size = strtok(NULL, " ");
   if (arg_size == NULL)
@@ -161,16 +167,12 @@ static int cmd_p(char *args) {
   else
   {
     printf("wrong!\n");
+    Assert(0, "get wrong");
   }
   printf("Result: %d\n", result);
   return 0;
-#elif
-  bool ret;
-  word_t result = expr(args, &ret);
-
-  printf("Result: %d\n", result);
-  return 0;
 #endif
+
 }
 
 // 设置监视点,	w EXPR	w *0x2000,	当表达式EXPR的值发生变化时, 暂停程序执行
