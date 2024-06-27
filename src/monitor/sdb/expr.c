@@ -14,6 +14,7 @@
 ***************************************************************************************/
 
 #include <isa.h>
+#include <memory/paddr.h>
 
 /* We use the POSIX regex functions to process regular expressions.
  * Type 'man regex' for more information about POSIX regex functions.
@@ -23,7 +24,8 @@
 // here a clever choice to let TK_NOTYPE from 256 to avoid
 // conflict with asic charater
 enum {
-  TK_NOTYPE = 256, TK_EQ, TK_DEC_NUM, TK_HEX_NUM, TK_REG_NAME
+  TK_NOTYPE = 256, TK_EQ, TK_DEC_NUM, TK_HEX_NUM,
+      TK_REG_NAME, TK_NEGATIVE, TK_DEREFENCE
 };
 
 static struct rule {
@@ -247,27 +249,9 @@ bool get_main_op(int p, int q, int *main_pos)
     {
       // not deal something like (+1) where + means positive
       case '+':
+      case '-':
         type = op_type;
         pos = i;
-        break;
-      case '-':
-        // to deal with '-' is neative or minus sign
-        // 1 + -1, 1 - -1, -1 + 1
-        if (type == TK_NOTYPE && pos == i)
-        {
-          // -1 + 1 situation
-          printf("get you");
-        }
-        else if (type != TK_NOTYPE && pos == (i - 1))
-        {
-          // 1 - - 1 situation
-          printf("get you");
-        }
-        else
-        {
-          type = op_type;
-          pos = i;
-        }
         break;
       case '*':
       case '/':
@@ -364,13 +348,39 @@ word_t eval(int p, int q, bool *success)
      */
     return eval(p + 1, q - 1, success);
   }
+  else if (q - p ==1)
+  {
+    switch (tokens[p].type)
+    {
+    case TK_NEGATIVE:
+      return -eval(q, q, success);
+      break;
+    case TK_DEREFENCE:
+      paddr_t addr = eval(q, q, success);
+      if (*success)
+      {
+        if (in_pmem(addr))
+        {
+          return paddr_read(addr, 4);
+        }
+        else
+        {
+          *success = false;
+          return 0;
+        }
+      }
+      else
+      {
+        return 0;
+      }
+      break;
+    default:
+      Assert(0, "should not happend");
+    }
+  }
   else {
     int main_pos = p;
-    if (check_negavitve(p, q))
-    {
-      return -eval(q, q, success);
-    }
-    else if (get_main_op(p, q, &main_pos))
+    if (get_main_op(p, q, &main_pos))
     {
       int op_type = tokens[main_pos].type;
       word_t val1 = eval(p, main_pos - 1, success);
@@ -393,6 +403,12 @@ word_t eval(int p, int q, bool *success)
   }
 }
 
+bool check_pre_type(int i)
+{
+  return tokens[i].type == '+' || tokens[i].type == '-' || tokens[i].type == '*' || tokens[i].type == '/' || tokens[i].
+    type == '(';
+}
+
 word_t expr(char *e, bool *success) {
   // first set success is true, any thing wrong happend
   // will set it to false
@@ -401,5 +417,18 @@ word_t expr(char *e, bool *success) {
     *success = false;
     return 0;
   }
+
+  // maybe need to check after type is a num
+  for (int i = 0; i < nr_token; i ++) {
+    if (tokens[i].type == '-' && (i == 0 || check_pre_type(i-1)) )
+    {
+      tokens[i].type = TK_NEGATIVE;
+    }
+    else if (tokens[i].type == '*' && (i == 0 || check_pre_type(i-1)) )
+    {
+      tokens[i].type = TK_DEREFENCE;
+    }
+  }
+
   return eval(0, nr_token - 1, success);
 }
