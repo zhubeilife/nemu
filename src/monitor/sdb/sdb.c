@@ -25,6 +25,9 @@ static int is_batch_mode = false;
 
 void init_regex();
 void init_wp_pool();
+void show_watch_point();
+bool add_new_expr_wp(char *args_expr);
+bool del_wp_no(int NO);
 
 /* We use the `readline' library to provide more flexibility to read from stdin. */
 static char* rl_gets() {
@@ -85,8 +88,7 @@ static int cmd_info(char *args) {
   }
   else if (strcmp(arg, "w") == 0)
   {
-    // TODO: implement
-    printf("Sorry waiting implemention!\n");
+    show_watch_point();
   }
   else
   {
@@ -113,8 +115,13 @@ static int cmd_x(char *args) {
   }
 
   char *arg_expr = strtok(NULL, " ");
-  // TODO(now just think expr is just a int)
-  int base_addr = strtol(arg_expr, NULL, 16);
+  bool success;
+  word_t base_addr = expr(arg_expr, &success);
+  if (!success)
+  {
+    printf("Can't get expr %s", arg_expr);
+    return 0;
+  }
 
   if (!in_pmem(base_addr) || !in_pmem(base_addr + 4*size))
   {
@@ -178,12 +185,26 @@ static int cmd_p(char *args) {
 
 // 设置监视点,	w EXPR	w *0x2000,	当表达式EXPR的值发生变化时, 暂停程序执行
 static int cmd_w(char *args) {
-
+  char *arg_expr = strtok(NULL, " ");
+  add_new_expr_wp(arg_expr);
   return 0;
 }
 
 // 删除监视点, d N,	d 2	删除序号为N的监视点
 static int cmd_d(char *args) {
+  char *arg_no = strtok(NULL, " ");
+  if (arg_no == NULL)
+  {
+    printf("Please Give no\n");
+    return 0;
+  }
+  int no = atoi(arg_no);
+  if (no < 0)
+  {
+    printf("Please Give right no\n");
+    return 0;
+  }
+  del_wp_no(no);
 
   return 0;
 }

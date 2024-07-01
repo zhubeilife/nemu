@@ -25,7 +25,8 @@
 // conflict with asic charater
 enum {
   TK_NOTYPE = 256, TK_EQ, TK_DEC_NUM, TK_HEX_NUM,
-      TK_REG_NAME, TK_NEGATIVE, TK_DEREFENCE
+      TK_REG_NAME, TK_NEGATIVE, TK_DEREFENCE, TK_LESS_EQ,
+      TK_LOGIC_AND,
 };
 
 static struct rule {
@@ -40,6 +41,8 @@ static struct rule {
   {"\\(", '('},         // left bracket
   {"\\)", ')'},         // right bracket
   {"==", TK_EQ},        // equal
+  {"<=", TK_LESS_EQ},   // less equal
+  {"&&", TK_LOGIC_AND}, // logic and
   {"\\$\\$?[0-9A-Za-z]+", TK_REG_NAME},         // reg name
   {"0[xX][0-9A-Fa-f]+", TK_HEX_NUM},        // hex number
   {"[[:digit:]]+", TK_DEC_NUM},             // dec number
@@ -327,7 +330,6 @@ word_t eval(int p, int q, bool *success)
       word_t reg_val = isa_reg_str2val(tokens[p].str + 1, success);
       if (*success)
       {
-        printf("temp" FMT_WORD, reg_val);
         return reg_val;
       }
       else
