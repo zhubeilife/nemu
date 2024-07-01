@@ -53,6 +53,24 @@ void show_watch_point()
   printf("\n");
 }
 
+bool check_wp_value_chage()
+{
+  bool changed = false;
+  WP * t_head = head;
+  while (t_head != NULL)
+  {
+    bool sucess = false;
+    word_t new_value = expr(t_head->expr, &sucess);
+    if (new_value != t_head->value && sucess)
+    {
+      changed = true;
+      t_head->value = expr(t_head->expr, &sucess);
+    }
+    t_head = t_head->next;
+  }
+  return changed;
+}
+
 void show_wp_debug_info()
 {
   printf("\n============---Watch Point Pool---============\n");
