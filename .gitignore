@@ -1,5 +1,3 @@
-*.*
-*
 !*/
 !Makefile
 !*.mk
@@ -13,3 +11,4 @@ include/generated
 .idea
 .vscode
 test/test.txt
+build

@@ -29,6 +29,10 @@ enum {
       TK_LOGIC_AND,
 };
 
+
+// TODO
+// 1. support more operators, such as '&&', '||' and so on.
+// for example: w $pc == ADDR
 static struct rule {
   const char *regex;
   int token_type;
