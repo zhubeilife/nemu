@@ -12,3 +12,6 @@ include/generated
 .vscode
 test/test.txt
 build
+.gdb_history
+doc/.DS_Store
+doc/riscv/.DS_Store

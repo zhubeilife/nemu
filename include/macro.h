@@ -87,6 +87,7 @@
 
 #define BITMASK(bits) ((1ull << (bits)) - 1)
 #define BITS(x, hi, lo) (((x) >> (lo)) & BITMASK((hi) - (lo) + 1)) // similar to x[hi:lo] in verilog
+// 执行符号扩展操作（Sign-Extend）。在计算机科学中，符号扩展是一种用于数据类型转换的方法，它扩展了一个整数的位数，同时保持其数值符号不变。
 #define SEXT(x, len) ({ struct { int64_t n : len; } __x = { .n = x }; (uint64_t)__x.n; })
 
 #define ROUNDUP(a, sz)   ((((uintptr_t)a) + (sz) - 1) & ~((sz) - 1))
