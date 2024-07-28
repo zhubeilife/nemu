@@ -88,6 +88,20 @@
 #define BITMASK(bits) ((1ull << (bits)) - 1)
 #define BITS(x, hi, lo) (((x) >> (lo)) & BITMASK((hi) - (lo) + 1)) // similar to x[hi:lo] in verilog
 // 执行符号扩展操作（Sign-Extend）。在计算机科学中，符号扩展是一种用于数据类型转换的方法，它扩展了一个整数的位数，同时保持其数值符号不变。
+/*
+// test how SEXT works
+int main()
+{
+    uint8_t x = 0b00000001;
+    uint8_t y = 0b10000001;
+
+    std::cout << "x = " << std::bitset<64>(SEXT(x, 8)) << std::endl;
+    std::cout << "y = " << std::bitset<64>(SEXT(y, 8)) << std::endl;
+
+    // x = 0000000000000000000000000000000000000000000000000000000000000001
+    // y = 1111111111111111111111111111111111111111111111111111111110000001
+}
+*/
 #define SEXT(x, len) ({ struct { int64_t n : len; } __x = { .n = x }; (uint64_t)__x.n; })
 
 #define ROUNDUP(a, sz)   ((((uintptr_t)a) + (sz) - 1) & ~((sz) - 1))
