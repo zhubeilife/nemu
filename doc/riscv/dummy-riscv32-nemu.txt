@@ -8,6 +8,10 @@ int main() {
 
 Disassembly of section .text:
 
+1. 第一条指令从abstract-machine/am/src/$ISA/nemu/start.S开始, 设置好栈顶之后就跳转到abstract-machine/am/src/platform/nemu/trm.c的_trm_init()函数处执行.
+2. 在_trm_init()中调用main()函数执行程序的主体功能, main()函数还带一个参数, 目前我们暂时不会用到, 后面我们再介绍它.
+3. 从main()函数返回后, 调用halt()结束运行.
+
 80000000 <_start>:
 80000000:	00000413          	addi	s0,zero,0
 80000004:	00009117          	auipc	sp,0x9  # 80009000 = 80000004 + 0x9<<12 - 4
