@@ -30,12 +30,39 @@ uint64_t g_nr_guest_inst = 0;
 static uint64_t g_timer = 0; // unit: us
 static bool g_print_step = false;
 
+#define RING_BUF_SIZE 10
+char ringbuf[RING_BUF_SIZE][128];
+int head = 0;
+int ring_counter = 0;
+
+void ringbuf_push(char *str) {
+  strcpy(ringbuf[head], str);
+  head = (head + 1) % RING_BUF_SIZE;
+  if (ring_counter != RING_BUF_SIZE)
+  {
+    ring_counter++;
+  }
+}
+
+void ringbuf_print() {
+  puts("==========Instruction Debug===========\n");
+  int start = 0;
+  if (ring_counter == RING_BUF_SIZE) {start = head % RING_BUF_SIZE;}
+  for (int i = 0; i < ring_counter; i++)
+  {
+    puts(ringbuf[start]);
+    start = (start + 1) % RING_BUF_SIZE;
+  }
+  puts("==========End Instruction Debug===========\n");
+}
+
 void device_update();
 bool check_wp_value_chage();
 
 static void trace_and_difftest(Decode *_this, vaddr_t dnpc) {
 #ifdef CONFIG_ITRACE_COND
   if (ITRACE_COND) { log_write("%s\n", _this->logbuf); }
+  if (ITRACE_COND) { ringbuf_push(_this->logbuf); }
 #endif
   if (g_print_step) { IFDEF(CONFIG_ITRACE, puts(_this->logbuf)); }
   IFDEF(CONFIG_DIFFTEST, difftest_step(_this->pc, dnpc));
@@ -97,6 +124,7 @@ static void statistic() {
 void assert_fail_msg() {
   isa_reg_display();
   statistic();
+  ringbuf_print();
 }
 
 /* Simulate how the CPU works. */
