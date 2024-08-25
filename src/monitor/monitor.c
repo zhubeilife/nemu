@@ -101,7 +101,7 @@ void init_ftrace()
       read_section_header_table(fp, eh, sh_tbl);
       //print_section_headers(fp, eh, sh_tbl);
       //print_symbol_table(fp, eh, sh_tbl);
-
+      init_record_func_symbol_table(fp, eh, sh_tbl);
       free(sh_tbl);
   }
 
