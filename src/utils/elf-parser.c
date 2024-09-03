@@ -11,6 +11,8 @@ typedef struct
 #define MAX_FTTRACE_FUNC_NUM 32
 static int record_func_syn_num = 0;
 static FUNC_SYM RECORD_FUN_SYM[MAX_FTTRACE_FUNC_NUM] = {};
+
+static int func_call_depth = 0;
 #endif
 
 void read_elf_header(FILE* fp, Elf32_Ehdr *elf_header)
@@ -156,7 +158,7 @@ void init_record_func_symbol_table(FILE* fp, Elf32_Ehdr eh, Elf32_Shdr sh_table[
     for(int i=0; i< num_symbols; i++) {
         if (ELF32_ST_TYPE(symbols[i].st_info) == STT_FUNC && record_func_syn_num < MAX_FTTRACE_FUNC_NUM)
         {
-            RECORD_FUN_SYM[record_func_syn_num].st_size = symbols[i].st_value;
+            RECORD_FUN_SYM[record_func_syn_num].st_size = symbols[i].st_size;
             RECORD_FUN_SYM[record_func_syn_num].st_value = symbols[i].st_value;
             strcpy(RECORD_FUN_SYM[record_func_syn_num].st_name, (strtab_data + symbols[i].st_name));
             record_func_syn_num++;
@@ -169,4 +171,36 @@ void init_record_func_symbol_table(FILE* fp, Elf32_Ehdr eh, Elf32_Shdr sh_table[
     free(symbols);
     free(strtab_data);
     free(shstrtab);
+}
+
+int find_record_func_sym(vaddr_t next_pc)
+{
+    for(int i = 0; i < record_func_syn_num; i++)
+    {
+        if (next_pc >= RECORD_FUN_SYM[i].st_value && next_pc < RECORD_FUN_SYM[i].st_value + RECORD_FUN_SYM[i].st_size)
+        {
+            return i;
+        }
+    }
+    return -1;
+}
+
+void log_ftrace(bool is_func_call, vaddr_t current_pc, vaddr_t next_pc)
+{
+    log_write(FMT_WORD":  ", current_pc);
+
+    if (is_func_call)
+    {
+        for (int i = 0; i < func_call_depth; i++) { log_write("  ");}
+        log_write("call  ");
+        func_call_depth++;
+    }
+    else
+    {
+        func_call_depth--;
+        for (int i = 0; i < func_call_depth; i++) { log_write("  ");}
+        log_write("ret   ");
+    }
+    int index = find_record_func_sym(next_pc);
+    log_write("[%s@"FMT_WORD"]\n", index < 0 ? "???" : RECORD_FUN_SYM[index].st_name, next_pc);
 }

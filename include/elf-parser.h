@@ -23,4 +23,6 @@ void print_section_headers(FILE* fp, Elf32_Ehdr eh, Elf32_Shdr sh_table[]);
 void print_symbol_table(FILE* fp, Elf32_Ehdr eh, Elf32_Shdr sh_table[]);
 void init_record_func_symbol_table(FILE* fp, Elf32_Ehdr eh, Elf32_Shdr sh_table[]);
 
+void log_ftrace(bool is_func_call, vaddr_t current_pc, vaddr_t next_pc);
+
 #endif //ELF_PARSER_H
