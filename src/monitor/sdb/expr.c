@@ -268,7 +268,8 @@ bool get_main_op(int p, int q, int *main_pos)
         }
         break;
       case '(':
-        // find coresponding ')'
+        {
+          // find coresponding ')'
           int left_count = 1;
           int right_count = 0;
           for (int j = i+1; j <= q; j++)
@@ -288,7 +289,8 @@ bool get_main_op(int p, int q, int *main_pos)
               break;
             }
           }
-        break;
+          break;
+        }
       case ')':
         // should not happend
         show_debug_info(p,q);
@@ -330,17 +332,19 @@ word_t eval(int p, int q, bool *success)
       return strtol(tokens[p].str, NULL, 10);
       break;
     case TK_REG_NAME:
-      word_t reg_val = isa_reg_str2val(tokens[p].str + 1, success);
-      if (*success)
       {
-        return reg_val;
+        word_t reg_val = isa_reg_str2val(tokens[p].str + 1, success);
+        if (*success)
+        {
+          return reg_val;
+        }
+        else
+        {
+          printf("Can't get reg %s value", tokens[p].str + 1);
+          return 0;
+        }
+        break;
       }
-      else
-      {
-        printf("Can't get reg %s value", tokens[p].str + 1);
-        return 0;
-      }
-      break;
     default:
       *success = false;
       printf("Expression is not a number with %s", tokens[p].str);
@@ -361,24 +365,26 @@ word_t eval(int p, int q, bool *success)
       return -eval(q, q, success);
       break;
     case TK_DEREFENCE:
-      paddr_t addr = eval(q, q, success);
-      if (*success)
       {
-        if (in_pmem(addr))
+        paddr_t addr = eval(q, q, success);
+        if (*success)
         {
-          return paddr_read(addr, 4);
+          if (in_pmem(addr))
+          {
+            return paddr_read(addr, 4);
+          }
+          else
+          {
+            *success = false;
+            return 0;
+          }
         }
         else
         {
-          *success = false;
           return 0;
         }
+        break;
       }
-      else
-      {
-        return 0;
-      }
-      break;
     default:
       Assert(0, "should not happend");
     }

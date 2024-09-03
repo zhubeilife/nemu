@@ -1,4 +1,5 @@
 #include <elf-parser.h>
+#include <debug.h>
 
 typedef struct
 {
@@ -18,7 +19,10 @@ static int func_call_depth = 0;
 void read_elf_header(FILE* fp, Elf32_Ehdr *elf_header)
 {
     fseek(fp, 0, SEEK_SET);
-    fread(elf_header, sizeof(Elf32_Ehdr), 1, fp);
+    if (fread(elf_header, sizeof(Elf32_Ehdr), 1, fp) != sizeof(Elf32_Ehdr))
+    {
+   		Log("read wrong number of bytes read");
+    }
 }
 
 bool is_ELF(Elf32_Ehdr eh)
@@ -48,7 +52,10 @@ void read_section_header_table(FILE* fp, Elf32_Ehdr eh, Elf32_Shdr sh_table[])
 {
     // seek to the section header table
     fseek(fp, eh.e_shoff, SEEK_SET);
-    fread(sh_table, sizeof(Elf32_Shdr) * eh.e_shnum, 1, fp);
+    if (fread(sh_table, sizeof(Elf32_Shdr) * eh.e_shnum, 1, fp) != sizeof(Elf32_Shdr) * eh.e_shnum)
+    {
+   		Log("read wrong number of bytes read");
+    }
 }
 
 void print_section_headers(FILE* fp, Elf32_Ehdr eh, Elf32_Shdr sh_table[])
@@ -56,7 +63,10 @@ void print_section_headers(FILE* fp, Elf32_Ehdr eh, Elf32_Shdr sh_table[])
     // seek to the section-header string-table
     fseek(fp, sh_table[eh.e_shstrndx].sh_offset, SEEK_SET);
     char *shstrtab = malloc(sh_table[eh.e_shstrndx].sh_size);
-    fread(shstrtab, sh_table[eh.e_shstrndx].sh_size, 1, fp);
+    if (fread(shstrtab, sh_table[eh.e_shstrndx].sh_size, 1, fp) != sh_table[eh.e_shstrndx].sh_size)
+    {
+   		Log("read wrong number of bytes read");
+    }
 
     printf("========================================");
     printf("========================================\n");
@@ -88,7 +98,11 @@ void print_symbol_table(FILE* fp, Elf32_Ehdr eh, Elf32_Shdr sh_table[])
     // seek to the section-header string-table
     fseek(fp, sh_table[eh.e_shstrndx].sh_offset, SEEK_SET);
     char *shstrtab = malloc(sh_table[eh.e_shstrndx].sh_size);
-    fread(shstrtab, sh_table[eh.e_shstrndx].sh_size, 1, fp);
+
+    if (fread(shstrtab, sh_table[eh.e_shstrndx].sh_size, 1, fp) != sh_table[eh.e_shstrndx].sh_size)
+    {
+   		Log("read wrong number of bytes read");
+    }
 
     Elf32_Shdr* symtab = NULL;
     Elf32_Shdr* strtab = NULL;
@@ -104,12 +118,18 @@ void print_symbol_table(FILE* fp, Elf32_Ehdr eh, Elf32_Shdr sh_table[])
     // symbol table
     fseek(fp, symtab->sh_offset, SEEK_SET);
     Elf32_Sym *symbols = malloc(symtab->sh_size);
-    fread(symbols, symtab->sh_size, 1, fp);
+    if (fread(symbols, symtab->sh_size, 1, fp) != symtab->sh_size)
+    {
+   		Log("read wrong number of bytes read");
+    }
 
     // string table
     fseek(fp, strtab->sh_offset, SEEK_SET);
     char *strtab_data = malloc(strtab->sh_size);
-    fread(strtab_data, strtab->sh_size, 1, fp);
+    if (fread(strtab_data, strtab->sh_size, 1, fp) != strtab->sh_size)
+    {
+    	Log("read wrong number of bytes read");
+    }
 
     // Print the symbols
     int num_symbols = symtab->sh_size / symtab->sh_entsize;
@@ -131,7 +151,10 @@ void init_record_func_symbol_table(FILE* fp, Elf32_Ehdr eh, Elf32_Shdr sh_table[
     // seek to the section-header string-table
     fseek(fp, sh_table[eh.e_shstrndx].sh_offset, SEEK_SET);
     char *shstrtab = malloc(sh_table[eh.e_shstrndx].sh_size);
-    fread(shstrtab, sh_table[eh.e_shstrndx].sh_size, 1, fp);
+    if (fread(shstrtab, sh_table[eh.e_shstrndx].sh_size, 1, fp) != sh_table[eh.e_shstrndx].sh_size)
+    {
+    	Log("read wrong number of bytes read");
+    }
 
     Elf32_Shdr* symtab = NULL;
     Elf32_Shdr* strtab = NULL;
@@ -147,12 +170,19 @@ void init_record_func_symbol_table(FILE* fp, Elf32_Ehdr eh, Elf32_Shdr sh_table[
     // symbol table
     fseek(fp, symtab->sh_offset, SEEK_SET);
     Elf32_Sym *symbols = malloc(symtab->sh_size);
-    fread(symbols, symtab->sh_size, 1, fp);
+    if (fread(symbols, symtab->sh_size, 1, fp) != symtab->sh_size)
+    {
+    	Log("read wrong number of bytes read");
+    }
 
     // string table
     fseek(fp, strtab->sh_offset, SEEK_SET);
     char *strtab_data = malloc(strtab->sh_size);
-    fread(strtab_data, strtab->sh_size, 1, fp);
+
+    if (fread(strtab_data, strtab->sh_size, 1, fp) != strtab->sh_size)
+    {
+        Log("read wrong number of bytes read");
+    }
 
     int num_symbols = symtab->sh_size / symtab->sh_entsize;
     for(int i=0; i< num_symbols; i++) {
