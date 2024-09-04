@@ -217,7 +217,7 @@ int find_record_func_sym(vaddr_t next_pc)
 
 void log_ftrace(bool is_func_call, vaddr_t current_pc, vaddr_t next_pc)
 {
-    log_write(FMT_WORD":  ", current_pc);
+    log_write("-->("FMT_WORD"):  ", current_pc);
 
     if (is_func_call)
     {
