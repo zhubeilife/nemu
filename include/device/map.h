@@ -38,6 +38,10 @@ static inline int find_mapid_by_addr(IOMap *maps, int size, paddr_t addr) {
   int i;
   for (i = 0; i < size; i ++) {
     if (map_inside(maps + i, addr)) {
+      // 由于NEMU中设备的行为是我们自定义的, 与REF中的标准设备的行为不完全一样
+      // (例如NEMU中的串口总是就绪的, 但QEMU中的串口也许并不是这样),
+      // 这导致在NEMU中执行输入指令的结果会和REF有所不同. 为了使得DiffTest可以正常工作,
+      // 框架代码在访问设备的过程中调用了difftest_skip_ref()函数
       difftest_skip_ref();
       return i;
     }
