@@ -7,7 +7,6 @@
 !README.md
 !Kconfig
 include/config
-include/generated
 .idea
 .vscode
 test/test.txt
