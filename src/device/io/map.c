@@ -52,10 +52,25 @@ void init_map() {
   p_space = io_space;
 }
 
+void log_device(IOMap *map, bool is_write)
+{
+  if (is_write)
+  {
+    log_write("@@@ write ");
+  }
+  else
+  {
+    log_write("@@@ read  ");
+  }
+
+  log_write("%s @@@\n", map->name);
+}
+
 word_t map_read(paddr_t addr, int len, IOMap *map) {
   assert(len >= 1 && len <= 8);
   check_bound(map, addr);
   paddr_t offset = addr - map->low;
+  IFDEF(CONFIG_DTRACE, log_device(map, false));
   invoke_callback(map->callback, offset, len, false); // prepare data to read
   word_t ret = host_read(map->space + offset, len);
   return ret;
@@ -66,5 +81,6 @@ void map_write(paddr_t addr, int len, word_t data, IOMap *map) {
   check_bound(map, addr);
   paddr_t offset = addr - map->low;
   host_write(map->space + offset, len, data);
+  IFDEF(CONFIG_DTRACE, log_device(map, true));
   invoke_callback(map->callback, offset, len, true);
 }
