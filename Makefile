@@ -66,7 +66,7 @@ LDFLAGS += $(CFLAGS_BUILD)
 ## 1-for test expr with test_expr.txt
 #CFLAGS  += -DTEST_EXPR=1
 ## 2-Do not delete intermediate files, leave *.i *.s *.i fle
-CFLAGS  += -save-temps
+#CFLAGS  += -save-temps
 
 # Include rules for menuconfig
 include $(NEMU_HOME)/scripts/config.mk
