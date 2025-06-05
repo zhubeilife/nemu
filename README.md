@@ -5,6 +5,7 @@ Currently it supports x86, mips32, riscv32 and riscv64.
 To build programs run above NEMU, refer to the [AM project](https://github.com/NJU-ProjectN/abstract-machine).
 
 The main features of NEMU include
+
 * a small monitor with a simple debugger
   * single step
   * register/memory examination
@@ -98,29 +99,3 @@ nemu
     ├── qemu-diff
     └── spike-diff
 ```
-
-## PA
-
-![](./doc/roadmap_light.png)
-
-摘抄自： https://raw.githubusercontent.com/TonyCrane/note/master/docs/cs/system/pa.md
-整个实验逐步引导完成一个计算机系统的构建，包括底层的 NEMU 模拟器，运行时环境 AbstractMachine（AM），在其上的简易操作系统 NanOS-lite，以及操作系统上的应用程序库 Navy-apps。
-一共分为 5 个部分，PA0 配置环境，PA1 完善 NEMU 的调试器功能，PA2 模拟 NEMU 指令运行以及补充 AM，PA3 完善 NEMU 的中断/异常处理、实现操作系统的系统调用以及简易文件系统功能，PA4 在操作系统中实现多道程序的运行、虚拟内存管理以及外部中断处理。
-PS：其中 AM 由五个部分组成，TRM（图灵机模拟）简单而且已经实现好了，IOE 为输入输出扩展，CTE 为上下文管理扩展，VME 为虚拟内存管理扩展，还有一个 MPE（多处理器扩展）在 PA 中不使用。klib 为简单的运行时库，提供给 AM 和操作系统使用。
-
-## Hint
-
-+ 存储器是个在nemu/src/memory/paddr.c中定义的大数组
-+ PC和通用寄存器都在nemu/src/isa/$ISA/include/isa-def.h中的结构体中定义
-+ TRM的工作方式通过cpu_exec()和exec_once()体现
-
-## Machine 
-
-+ The machine is always right. (机器永远是对的)
-  - Corollary: If the program does not produce the desired output, it is the programmer's fault.
-+ Every line of untested code is always wrong. (未测试代码永远是错的)
-  - Corollary: Mistakes are likely to appear in the "must-be-correct" code.
-+  系统设计的黄金法则 -- KISS法则
-  - 这里的KISS是Keep It Simple, Stupid的缩写, 它的中文翻译是: 不要在一开始追求绝对的完美.
-  - 唯一可以把你从bug的混沌中拯救出来的就是KISS法则, 它的宗旨是从易到难, 逐步推进, 一次只做一件事, 少做无关的事. 
-  - 这些教训也让我不断地去思考为什么要用KISS原则。慢慢地我体会到，KISS原则目的其实是——“快速推进、逐步优化”。我们设计一个算法，往往可以在大脑中预先思考好，然后直接编程写出来。但是，我们设计实现一个系统，当系统的复杂度超出我们大脑的工作记忆容量时，就无法在大脑中去“模拟”每一个细节。此时，我们应该用最快的速度去把系统建起了，然后再对各个环节进行优化。 (https://blog.sciencenet.cn/blog-414166-562616.html)
