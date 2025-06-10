@@ -52,6 +52,7 @@ void read_section_header_table(FILE* fp, Elf32_Ehdr eh, Elf32_Shdr sh_table[])
 {
     // seek to the section header table
     fseek(fp, eh.e_shoff, SEEK_SET);
+    // TODO: 这里的判断是错误的，fread返回的是读取的object的大小
     if (fread(sh_table, sizeof(Elf32_Shdr) * eh.e_shnum, 1, fp) != sizeof(Elf32_Shdr) * eh.e_shnum)
     {
    		Log("read wrong number of bytes read");

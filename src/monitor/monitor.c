@@ -99,8 +99,8 @@ void init_ftrace()
       panic("Failed to allocate %d bytes\n", (eh.e_shentsize * eh.e_shnum));
     }
       read_section_header_table(fp, eh, sh_tbl);
-      //print_section_headers(fp, eh, sh_tbl);
-      //print_symbol_table(fp, eh, sh_tbl);
+      print_section_headers(fp, eh, sh_tbl);
+      print_symbol_table(fp, eh, sh_tbl);
       init_record_func_symbol_table(fp, eh, sh_tbl);
       free(sh_tbl);
   }

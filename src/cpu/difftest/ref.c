@@ -18,8 +18,10 @@
 #include <difftest-def.h>
 #include <memory/paddr.h>
 
+// 被测器件(Device Under Test)/设计中正在测试的(Design Under Test)
 // 在DUT host memory的`buf`和REF guest memory的`addr`之间拷贝`n`字节,
 // `direction`指定拷贝的方向, `DIFFTEST_TO_DUT`表示往DUT拷贝, `DIFFTEST_TO_REF`表示往REF拷贝
+// enum { DIFFTEST_TO_DUT, DIFFTEST_TO_REF };
 __EXPORT void difftest_memcpy(paddr_t addr, void *buf, size_t n, bool direction) {
   assert(0);
 }
