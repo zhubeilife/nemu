@@ -8,12 +8,20 @@ typedef struct
     word_t	st_size;		/* Symbol size */
 } FUNC_SYM;
 
-#ifdef CONFIG_FTRACE
 #define MAX_FTTRACE_FUNC_NUM 32
 static int record_func_syn_num = 0;
 static FUNC_SYM RECORD_FUN_SYM[MAX_FTTRACE_FUNC_NUM] = {};
 
 static int func_call_depth = 0;
+
+#ifdef CONFIG_FTRACE
+// TODO: 下面的elf相关的函数应该也需要在config_FTRACE的范围内
+// 如果去掉fttrace的menuconfig，会🧬报错，这里选择先快速解决
+// #define MAX_FTTRACE_FUNC_NUM 32
+// static int record_func_syn_num = 0;
+// static FUNC_SYM RECORD_FUN_SYM[MAX_FTTRACE_FUNC_NUM] = {};
+//
+// static int func_call_depth = 0;
 #endif
 
 void read_elf_header(FILE* fp, Elf32_Ehdr *elf_header)

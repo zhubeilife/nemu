@@ -49,8 +49,10 @@ static inline int find_mapid_by_addr(IOMap *maps, int size, paddr_t addr) {
   return -1;
 }
 
+// 端口映射I/O(port-mapped I/O)
 void add_pio_map(const char *name, ioaddr_t addr,
         void *space, uint32_t len, io_callback_t callback);
+// 内存映射I/O(memory-mapped I/O, MMIO)
 void add_mmio_map(const char *name, paddr_t addr,
         void *space, uint32_t len, io_callback_t callback);
 
