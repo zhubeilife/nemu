@@ -35,8 +35,8 @@ CONFIG_CC_O2=y
 # CONFIG_CC_O3 is not set
 CONFIG_CC_OPT="-O2"
 # CONFIG_CC_LTO is not set
-CONFIG_CC_DEBUG=y
-CONFIG_CC_ASAN=y
+# CONFIG_CC_DEBUG is not set
+# CONFIG_CC_ASAN is not set
 # end of Build Options
 
 #
@@ -47,7 +47,7 @@ CONFIG_TRACE_START=0
 CONFIG_TRACE_END=10000
 # CONFIG_ITRACE is not set
 # CONFIG_MTRACE is not set
-CONFIG_FTRACE=y
+# CONFIG_FTRACE is not set
 # CONFIG_DTRACE is not set
 # CONFIG_DIFFTEST is not set
 CONFIG_DIFFTEST_REF_PATH="none"

@@ -54,9 +54,9 @@ void init_mem() {
 void memory_trace(paddr_t addr, int len, bool is_read) {
 #ifdef CONFIG_MTRACE
   if (is_read)
-    log_write("Memory Read  " FMT_PADDR "len: %d\n", addr, len);
+    log_write("Memory Read  " FMT_PADDR " len: %d\n", addr, len);
   else
-    log_write("Memory Write " FMT_PADDR "len: %d\n", addr, len);
+    log_write("Memory Write " FMT_PADDR " len: %d\n", addr, len);
 #endif
 }
 
