@@ -52,6 +52,11 @@ void isa_reg_display() {
     printf("(%3s: " FMT_WORD " )  ", regs[i], cpu.gpr[i]);
   }
   printf("\n");
+  printf("(%7s: " FMT_WORD  " )  ", "mstatus", cpu.csr.mstatus.val);
+  printf("(%7s: " FMT_WORD  " )  ", "mtvec",   cpu.csr.mtvec);
+  printf("(%7s: " FMT_WORD  " )  ", "mepc",    cpu.csr.mepc);
+  printf("(%7s: " FMT_WORD  " )  ", "mcause",  cpu.csr.mcause);
+  printf("\n");
 }
 
 // 若存在名称为name的寄存器, 则返回其当前值, 并设置success为true; 否则设置success为false.
@@ -70,5 +75,27 @@ word_t isa_reg_str2val(const char *name, bool *success) {
     *success = true;
     return cpu.pc;
   }
+
+  if (strcmp(name, "mstatus") == 0)
+  {
+    *success = true;
+    return cpu.csr.mstatus.val;
+  }
+  if (strcmp(name, "mtvec") == 0)
+  {
+    *success = true;
+    return cpu.csr.mtvec;
+  }
+  if (strcmp(name, "mepc") == 0)
+  {
+    *success = true;
+    return cpu.csr.mepc;
+  }
+  if (strcmp(name, "mcause") == 0)
+  {
+    *success = true;
+    return cpu.csr.mcause;
+  }
+
   return 0;
 }

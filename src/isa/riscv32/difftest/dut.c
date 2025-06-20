@@ -20,7 +20,30 @@
 bool isa_difftest_checkregs(CPU_state *ref_r, vaddr_t pc) {
   for (int i = 0; i < MUXDEF(CONFIG_RVE, 16, 32); i++)
   {
-    if (ref_r->gpr[i] != cpu.gpr[i]) {return false;}
+    if (ref_r->gpr[i] != cpu.gpr[i]) {
+      printf("reg[%d] is different! ref: 0x%08x, current: 0x%08x\n", i, ref_r->gpr[i], cpu.gpr[i]);
+      return false;
+    }
+  }
+  if (ref_r->pc != cpu.pc) {
+    printf("pc is different! ref: 0x%08x, current: 0x%08x\n", ref_r->pc, cpu.pc);
+    return false;
+  }
+  if (ref_r->csr.mstatus.val != cpu.csr.mstatus.val) {
+    printf("mstatus is different! ref: 0x%08x, current: 0x%08x\n", ref_r->csr.mstatus.val, cpu.csr.mstatus.val);
+    return false;
+  }
+  if (ref_r->csr.mcause != cpu.csr.mcause) {
+    printf("mcause is different! ref: 0x%08x, current: 0x%08x\n", ref_r->csr.mcause, cpu.csr.mcause);
+    return false;
+  }
+  if (ref_r->csr.mepc != cpu.csr.mepc) {
+    printf("mepc is different! ref: 0x%08x, current: 0x%08x\n", ref_r->csr.mepc, cpu.csr.mepc);
+    return false;
+  }
+  if (ref_r->csr.mtvec != cpu.csr.mtvec) {
+    printf("mtvec is different! ref: 0x%08x, current: 0x%08x\n", ref_r->csr.mtvec, cpu.csr.mtvec);
+    return false;
   }
   return true;
 }
