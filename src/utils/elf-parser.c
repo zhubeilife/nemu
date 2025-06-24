@@ -224,6 +224,11 @@ int find_record_func_sym(vaddr_t next_pc)
     return -1;
 }
 
+char* find_record_func_name(vaddr_t next_pc) {
+    int index = find_record_func_sym(next_pc);
+    return index == -1 ? "???" : RECORD_FUN_SYM[index].st_name;
+}
+
 void log_ftrace(bool is_func_call, vaddr_t current_pc, vaddr_t next_pc)
 {
     log_write("-->("FMT_WORD"):  ", current_pc);
