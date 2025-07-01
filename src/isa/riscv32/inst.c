@@ -35,7 +35,7 @@ static word_t* csr_reg(word_t imm) {
 
 #define CSR(i) *csr_reg(i)
 // void yield() { asm volatile("li a7, -1; ecall");}
-#define ECALL(dnpc) { bool success; dnpc = (isa_raise_intr(isa_reg_str2val("a7", &success), s->pc)); }
+#define ECALL(dnpc) { dnpc = isa_raise_intr(ENVIRONMENT_CALL_FROM_M_MODE, s->pc); }
 
 enum {
   TYPE_I,   // immediate

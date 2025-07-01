@@ -18,6 +18,40 @@
 
 #include <common.h>
 
+/*
+Arch/ABI    Instruction           System  Ret  Ret  Error    Notes
+                                  call #  val  val2
+───────────────────────────────────────────────────────────────────
+arm/OABI    swi NR                -       r0   -    -        2
+arm/EABI    swi 0x0               r7      r0   r1   -
+arm64       svc #0                w8      x0   x1   -
+i386        int $0x80             eax     eax  edx  -
+ia64        break 0x100000        r15     r8   r9   r10      1, 6
+mips        syscall               v0      v0   v1   a3       1, 6
+riscv       ecall                 a7      a0   a1   -
+*/
+
+typedef enum {
+  //mcause 的最高位在发生中断时置 1,发生同步异常时置 0
+  INSTRUCTION_ADDRESS_MISALIGNED = 0,  // 指令地址未对齐
+  INSTRUCTION_ACCESS_FAULT       = 1,  // 指令访问故障
+  ILLEGAL_INSTRUCTION            = 2,  // 非法指令
+  BREAKPOINT                     = 3,  // 断点
+  LOAD_ADDRESS_MISALIGNED        = 4,  // 加载地址未对齐
+  LOAD_ACCESS_FAULT              = 5,  // 加载访问故障
+  STORE_ADDRESS_MISALIGNED       = 6,  // 存储地址未对齐
+  STORE_ACCESS_FAULT             = 7,  // 存储访问故障
+  ENVIRONMENT_CALL_FROM_U_MODE   = 8,  // 用户模式的环境调用
+  ENVIRONMENT_CALL_FROM_S_MODE   = 9,  // 管理模式的环境调用（若存在）
+  ENVIRONMENT_CALL_FROM_M_MODE   = 11, // 机器模式的环境调用
+  INSTRUCTION_PAGE_FAULT         = 12, // 指令页面故障
+  LOAD_PAGE_FAULT                = 13, // 加载页面故障
+  STORE_PAGE_FAULT               = 15, // 存储页面故障
+  // 中断的最高位为1，这里使用更大的数值表示
+  INTERRUPT_MACHINE_TIMER        = 0x80000007, // 机器定时器中断
+  INTERRUPT_MACHINE_EXTERNAL     = 0x8000000b  // 机器外部中断
+} RiscV_ExceptionCode;
+
 typedef union {
   struct {
     uint32_t UIE: 1, SIE: 1, WPRI_0: 1, MIE: 1;
