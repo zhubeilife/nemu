@@ -42,6 +42,7 @@ void difftest_attach() {
   difftest_on = true;
 
   // ref_difftest_memcpy(RESET_VECTOR, guest_to_host(RESET_VECTOR), img_size, DIFFTEST_TO_REF); --> seems only copy the image/code not include the data part
+  // TODO: this is not fully test
   ref_difftest_memcpy(CONFIG_MBASE, guest_to_host(CONFIG_MBASE), CONFIG_MSIZE, DIFFTEST_TO_REF);
   ref_difftest_regcpy(&cpu, DIFFTEST_TO_REF);
   // TODO: there should be some logic related to isa
