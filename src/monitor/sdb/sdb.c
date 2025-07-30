@@ -273,6 +273,7 @@ static int cmd_save(char *args) {
   return 0;
 }
 
+// TODO 如果difftest打开了，需要坐下恢复
 static int cmd_load(char *args) {
   printf("Load status from file\n");
   FILE *fptr;
