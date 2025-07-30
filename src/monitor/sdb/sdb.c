@@ -18,6 +18,7 @@
 #include <readline/readline.h>
 #include <readline/history.h>
 #include "sdb.h"
+#include <cpu/difftest.h>
 
 #include <memory/paddr.h>
 
@@ -209,6 +210,18 @@ static int cmd_d(char *args) {
   return 0;
 }
 
+static int cmd_detach(char *args) {
+  IFDEF(CONFIG_DIFFTEST, difftest_detach());
+  printf("Difftest detach\n");
+  return 0;
+}
+
+static int cmd_attach(char *args) {
+  IFDEF(CONFIG_DIFFTEST, difftest_attach());
+  printf("Difftest attach\n");
+  return 0;
+}
+
 static int cmd_help(char *args);
 
 static struct {
@@ -225,6 +238,8 @@ static struct {
   { "p", "Prints the value which the indicated expression evaluates to as a hexadecimal number", cmd_p },
   { "w", "Add Watch Point", cmd_w },
   { "d", "Delte Watch Point", cmd_d },
+  { "detach", "quit Diff Test", cmd_detach },
+  { "attach", "open Diff Test", cmd_attach },
 };
 
 #define NR_CMD ARRLEN(cmd_table)

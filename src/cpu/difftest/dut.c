@@ -30,6 +30,23 @@ void (*ref_difftest_raise_intr)(uint64_t NO) = NULL;
 
 static bool is_skip_ref = false;
 static int skip_dut_nr_inst = 0;
+static bool difftest_on = true;
+
+void difftest_detach()
+{
+  // detach命令用于退出DiffTest模式, 之后DUT执行的所有指令将不再与REF进行比对. 实现方式非常简单, 只需要让difftest_step(), difftest_skip_dut()和difftest_skip_ref()直接返回即可.
+  difftest_on = false;
+}
+
+void difftest_attach() {
+  difftest_on = true;
+
+  // ref_difftest_memcpy(RESET_VECTOR, guest_to_host(RESET_VECTOR), img_size, DIFFTEST_TO_REF); --> seems only copy the image/code not include the data part
+  ref_difftest_memcpy(CONFIG_MBASE, guest_to_host(CONFIG_MBASE), CONFIG_MSIZE, DIFFTEST_TO_REF);
+  ref_difftest_regcpy(&cpu, DIFFTEST_TO_REF);
+  // TODO: there should be some logic related to isa
+  isa_difftest_attach();
+}
 
 // this is used to let ref skip instructions which
 // can not produce consistent behavior with NEMU
@@ -38,6 +55,8 @@ static int skip_dut_nr_inst = 0;
 // 执行它后, 在difftest_step()中会让REF跳过当前指令的执行,
 // 同时把NEMU的当前的寄存器状态直接同步到REF中, 效果相当于"该指令的执行结果以NEMU的状态为准".
 void difftest_skip_ref() {
+  if (!difftest_on) return;
+
   is_skip_ref = true;
   // If such an instruction is one of the instruction packing in QEMU
   // (see below), we end the process of catching up with QEMU's pc to
@@ -62,6 +81,8 @@ void difftest_skip_ref() {
 // 执行它后, 会马上让REF单步执行nr_ref次, 然后期望NEMU可以在nr_dut条指令之内追上REF的状态,
 // 期间会跳过其中所有指令的检查.`
 void difftest_skip_dut(int nr_ref, int nr_dut) {
+  if (!difftest_on) return;
+
   skip_dut_nr_inst += nr_dut;
 
   while (nr_ref -- > 0) {
@@ -111,6 +132,8 @@ static void checkregs(CPU_state *ref, vaddr_t pc) {
 }
 
 void difftest_step(vaddr_t pc, vaddr_t npc) {
+  if (!difftest_on) return;
+
   CPU_state ref_r;
 
   if (skip_dut_nr_inst > 0) {
