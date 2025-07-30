@@ -16,3 +16,4 @@ doc/.DS_Store
 doc/riscv/.DS_Store
 *.i
 *.s
+nemu_screenshot.bin

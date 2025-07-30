@@ -49,6 +49,7 @@ void init_mem() {
 #endif
   IFDEF(CONFIG_MEM_RANDOM, memset(pmem, rand(), CONFIG_MSIZE));
   Log("physical memory area [" FMT_PADDR ", " FMT_PADDR "]", PMEM_LEFT, PMEM_RIGHT);
+  Log("pmem: %p %p", &(pmem[0]), pmem);
 }
 
 void memory_trace(paddr_t addr, int len, bool is_read) {

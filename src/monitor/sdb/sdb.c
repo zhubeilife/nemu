@@ -222,6 +222,109 @@ static int cmd_attach(char *args) {
   return 0;
 }
 
+// 比较暴力的直接把cpu和内存的都给保存下来了
+// TODO未经过测试
+static int cmd_save(char *args) {
+  printf("Save current status to file\n");
+  FILE *fptr;
+  fptr = fopen("nemu_screenshot", "wb");
+  
+  if (fptr == NULL) {
+    printf("Failed to open file for writing\n");
+    return 0;
+  }
+  
+  // Save CPU state
+  fwrite(&cpu, sizeof(CPU_state), 1, fptr);
+  
+  // Save physical memory by reading it in chunks
+  // We need to read from CONFIG_MBASE to CONFIG_MBASE + CONFIG_MSIZE
+  
+  uint8_t buffer[4096]; // 4KB buffer
+  paddr_t addr = CONFIG_MBASE;
+  size_t remaining = CONFIG_MSIZE;
+  
+  while (remaining > 0) {
+    size_t chunk_size = (remaining < 4096) ? remaining : 4096;
+    
+    // Read memory in chunks
+    for (size_t i = 0; i < chunk_size; i += 4) {
+      if (i + 4 <= chunk_size) {
+        word_t data = paddr_read(addr + i, 4);
+        buffer[i] = data & 0xFF;
+        buffer[i + 1] = (data >> 8) & 0xFF;
+        buffer[i + 2] = (data >> 16) & 0xFF;
+        buffer[i + 3] = (data >> 24) & 0xFF;
+      } else {
+        // Handle remaining bytes
+        for (size_t j = i; j < chunk_size; j++) {
+          buffer[j] = paddr_read(addr + j, 1) & 0xFF;
+        }
+      }
+    }
+    
+    fwrite(buffer, 1, chunk_size, fptr);
+    addr += chunk_size;
+    remaining -= chunk_size;
+  }
+  
+  fclose(fptr);
+  printf("Status saved to nemu_screenshot\n");
+  return 0;
+}
+
+static int cmd_load(char *args) {
+  printf("Load status from file\n");
+  FILE *fptr;
+  fptr = fopen("nemu_screenshot", "rb");
+  
+  if (fptr == NULL) {
+    printf("Failed to open file for reading\n");
+    return 0;
+  }
+  
+  // Load CPU state
+  fread(&cpu, sizeof(CPU_state), 1, fptr);
+  
+  // Load physical memory by writing it in chunks
+  uint8_t buffer[4096]; // 4KB buffer
+  paddr_t addr = CONFIG_MBASE;
+  size_t remaining = CONFIG_MSIZE;
+  
+  while (remaining > 0) {
+    size_t chunk_size = (remaining < 4096) ? remaining : 4096;
+    
+    // Read chunk from file
+    size_t bytes_read = fread(buffer, 1, chunk_size, fptr);
+    if (bytes_read != chunk_size) {
+      printf("Failed to read memory data from file\n");
+      fclose(fptr);
+      return 0;
+    }
+    
+    // Write memory in chunks
+    for (size_t i = 0; i < chunk_size; i += 4) {
+      if (i + 4 <= chunk_size) {
+        word_t data = buffer[i] | (buffer[i + 1] << 8) | 
+                     (buffer[i + 2] << 16) | (buffer[i + 3] << 24);
+        paddr_write(addr + i, 4, data);
+      } else {
+        // Handle remaining bytes
+        for (size_t j = i; j < chunk_size; j++) {
+          paddr_write(addr + j, 1, buffer[j]);
+        }
+      }
+    }
+    
+    addr += chunk_size;
+    remaining -= chunk_size;
+  }
+  
+  fclose(fptr);
+  printf("Status loaded from nemu_screenshot\n");
+  return 0;
+}
+
 static int cmd_help(char *args);
 
 static struct {
@@ -240,6 +343,8 @@ static struct {
   { "d", "Delte Watch Point", cmd_d },
   { "detach", "quit Diff Test", cmd_detach },
   { "attach", "open Diff Test", cmd_attach },
+  { "save", "save current status", cmd_save },
+  { "load", "load save status", cmd_load },
 };
 
 #define NR_CMD ARRLEN(cmd_table)
