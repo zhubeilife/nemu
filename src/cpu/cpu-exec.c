@@ -57,7 +57,7 @@ void ringbuf_print() {
 }
 
 void device_update();
-bool check_wp_value_chage();
+bool check_wp_value_chage(word_t * old_value, word_t *change_value);
 
 static void trace_and_difftest(Decode *_this, vaddr_t dnpc) {
 #ifdef CONFIG_ITRACE_COND
@@ -66,11 +66,12 @@ static void trace_and_difftest(Decode *_this, vaddr_t dnpc) {
 #endif
   if (g_print_step) { IFDEF(CONFIG_ITRACE, puts(_this->logbuf)); }
   IFDEF(CONFIG_DIFFTEST, difftest_step(_this->pc, dnpc));
-  if (check_wp_value_chage())
+  word_t old_value, new_value;
+  if (check_wp_value_chage(&old_value, &new_value))
   {
     // TODO: the halt_ret is right?
     set_nemu_state(NEMU_STOP, _this->pc, 0);
-    printf("Watch Point value changed after executing instruction at pc = " FMT_WORD "\n", _this->pc);
+    printf("Watch Point value changed after executing instruction at pc = " FMT_WORD ", changes from: %x to %x\n", _this->pc, old_value, new_value);
   }
 }
 

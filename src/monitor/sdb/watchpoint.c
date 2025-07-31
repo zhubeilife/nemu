@@ -53,7 +53,7 @@ void show_watch_point()
   printf("\n");
 }
 
-bool check_wp_value_chage()
+bool check_wp_value_chage(word_t * old_value, word_t *change_value)
 {
   bool changed = false;
   WP * t_head = head;
@@ -64,6 +64,8 @@ bool check_wp_value_chage()
     if (new_value != t_head->value && sucess)
     {
       changed = true;
+      *old_value = t_head->value;
+      *change_value = new_value;
       t_head->value = expr(t_head->expr, &sucess);
     }
     t_head = t_head->next;

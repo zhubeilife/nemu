@@ -231,18 +231,19 @@ char* find_record_func_name(vaddr_t next_pc) {
 
 void log_ftrace(bool is_func_call, vaddr_t current_pc, vaddr_t next_pc)
 {
-    log_write("-->("FMT_WORD"):  ", current_pc);
+    int current_index = find_record_func_sym(current_pc);
+    log_write("-->("FMT_WORD" / %s):  ", current_pc, index < 0 ? "???" : RECORD_FUN_SYM[current_index].st_name);
 
     if (is_func_call)
     {
-        for (int i = 0; i < func_call_depth; i++) { log_write("  ");}
+        // for (int i = 0; i < func_call_depth; i++) { log_write("  ");}
         log_write("call  ");
         func_call_depth++;
     }
     else
     {
         func_call_depth--;
-        for (int i = 0; i < func_call_depth; i++) { log_write("  ");}
+        // for (int i = 0; i < func_call_depth; i++) { log_write("  ");}
         log_write("ret   ");
     }
     int index = find_record_func_sym(next_pc);
