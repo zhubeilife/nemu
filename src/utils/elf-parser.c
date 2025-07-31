@@ -8,7 +8,7 @@ typedef struct
     word_t	st_size;		/* Symbol size */
 } FUNC_SYM;
 
-#define MAX_FTTRACE_FUNC_NUM 32
+#define MAX_FTTRACE_FUNC_NUM 256
 static int record_func_syn_num = 0;
 static FUNC_SYM RECORD_FUN_SYM[MAX_FTTRACE_FUNC_NUM] = {};
 
@@ -204,6 +204,9 @@ void init_record_func_symbol_table(FILE* fp, Elf32_Ehdr eh, Elf32_Shdr sh_table[
             // printf("0x%08x ", symbols[i].st_value);
             // printf("0x%02x ", symbols[i].st_size);
             // printf("%s\n", (strtab_data + symbols[i].st_name));
+        }
+        else if (record_func_syn_num >= MAX_FTTRACE_FUNC_NUM) {
+            Log("!!! MAX_FTTRACE_FUNC_NUM is not enough");
         }
     }
 
