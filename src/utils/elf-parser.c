@@ -232,9 +232,28 @@ char* find_record_func_name(vaddr_t next_pc) {
     return index == -1 ? "???" : RECORD_FUN_SYM[index].st_name;
 }
 
+#ifdef CONFIG_SKIP_PART_FTRACE
+char* skip_func[] = {"vsprintf", "putch", "p_itoa", "skip_part_func_trace", "printf", "p_itoa_hex", "strcmp", "print_segment_headers"};
+#define skip_func_size sizeof(skip_func)/sizeof(skip_func[0])
+bool skip_part_func_trace(int index) {
+    if (index < 0) {
+        return false;
+    }
+   for (int i = 0; i < skip_func_size; i++) {
+       if (strcmp(RECORD_FUN_SYM[index].st_name, skip_func[i]) == 0) {
+           return true;
+       }
+   }
+    return false;
+}
+#endif
+
 void log_ftrace(bool is_func_call, vaddr_t current_pc, vaddr_t next_pc)
 {
     int current_index = find_record_func_sym(current_pc);
+#ifdef CONFIG_SKIP_PART_FTRACE
+    if (skip_part_func_trace(current_index)) return;
+#endif
     log_write("-->("FMT_WORD" / %s):  ", current_pc, index < 0 ? "???" : RECORD_FUN_SYM[current_index].st_name);
 
     if (is_func_call)

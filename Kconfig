@@ -161,6 +161,11 @@ config FTRACE
   bool "Enable function tracer"
   default n
 
+config SKIP_PART_FTRACE
+  depends on TRACE && TARGET_NATIVE_ELF && ENGINE_INTERPRETER
+  bool "Skip part function tracer"
+  default n
+
 config ETRACE
   depends on TRACE && TARGET_NATIVE_ELF && ENGINE_INTERPRETER
   bool "Enable exception tracer"
