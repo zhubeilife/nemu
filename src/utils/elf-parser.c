@@ -8,7 +8,7 @@ typedef struct
     word_t	st_size;		/* Symbol size */
 } FUNC_SYM;
 
-#define MAX_FTTRACE_FUNC_NUM 256
+#define MAX_FTTRACE_FUNC_NUM 1024
 static int record_func_syn_num = 0;
 static FUNC_SYM RECORD_FUN_SYM[MAX_FTTRACE_FUNC_NUM] = {};
 
@@ -24,9 +24,9 @@ static int func_call_depth = 0;
 // static int func_call_depth = 0;
 #endif
 
-void read_elf_header(FILE* fp, Elf32_Ehdr *elf_header)
+void read_elf_header(FILE* fp, Elf32_Ehdr *elf_header, int file_offset)
 {
-    fseek(fp, 0, SEEK_SET);
+    fseek(fp, 0 + file_offset, SEEK_SET);
     if (fread(elf_header, sizeof(Elf32_Ehdr), 1, fp) != sizeof(Elf32_Ehdr))
     {
    		Log("read wrong number of bytes read");
@@ -43,7 +43,7 @@ bool is_ELF(Elf32_Ehdr eh)
         /* IS a ELF file */
         return true;
     } else {
-        // printf("ELFMAGIC mismatch!\n");
+        printf("ELFMAGIC mismatch with [%s] != [%s]\n", (char*)eh.e_ident, "\177ELF");
         /* Not ELF file */
         return false;
     }
@@ -56,10 +56,10 @@ bool is64BitELF(Elf32_Ehdr eh) {
         return false;
 }
 
-void read_section_header_table(FILE* fp, Elf32_Ehdr eh, Elf32_Shdr sh_table[])
+void read_section_header_table(FILE* fp, Elf32_Ehdr eh, Elf32_Shdr sh_table[], int file_offset)
 {
     // seek to the section header table
-    fseek(fp, eh.e_shoff, SEEK_SET);
+    fseek(fp, eh.e_shoff + file_offset, SEEK_SET);
     // TODO: 这里的判断是错误的，fread返回的是读取的object的大小
     if (fread(sh_table, sizeof(Elf32_Shdr) * eh.e_shnum, 1, fp) != sizeof(Elf32_Shdr) * eh.e_shnum)
     {
@@ -67,10 +67,10 @@ void read_section_header_table(FILE* fp, Elf32_Ehdr eh, Elf32_Shdr sh_table[])
     }
 }
 
-void print_section_headers(FILE* fp, Elf32_Ehdr eh, Elf32_Shdr sh_table[])
+void print_section_headers(FILE* fp, Elf32_Ehdr eh, Elf32_Shdr sh_table[], int file_offset)
 {
     // seek to the section-header string-table
-    fseek(fp, sh_table[eh.e_shstrndx].sh_offset, SEEK_SET);
+    fseek(fp, sh_table[eh.e_shstrndx].sh_offset + file_offset, SEEK_SET);
     char *shstrtab = malloc(sh_table[eh.e_shstrndx].sh_size);
     if (fread(shstrtab, sh_table[eh.e_shstrndx].sh_size, 1, fp) != sh_table[eh.e_shstrndx].sh_size)
     {
@@ -102,10 +102,10 @@ void print_section_headers(FILE* fp, Elf32_Ehdr eh, Elf32_Shdr sh_table[])
     free(shstrtab);
 }
 
-void print_symbol_table(FILE* fp, Elf32_Ehdr eh, Elf32_Shdr sh_table[])
+void print_symbol_table(FILE* fp, Elf32_Ehdr eh, Elf32_Shdr sh_table[], int file_offset)
 {
     // seek to the section-header string-table
-    fseek(fp, sh_table[eh.e_shstrndx].sh_offset, SEEK_SET);
+    fseek(fp, sh_table[eh.e_shstrndx].sh_offset + file_offset, SEEK_SET);
     char *shstrtab = malloc(sh_table[eh.e_shstrndx].sh_size);
 
     if (fread(shstrtab, sh_table[eh.e_shstrndx].sh_size, 1, fp) != sh_table[eh.e_shstrndx].sh_size)
@@ -125,7 +125,7 @@ void print_symbol_table(FILE* fp, Elf32_Ehdr eh, Elf32_Shdr sh_table[])
     }
 
     // symbol table
-    fseek(fp, symtab->sh_offset, SEEK_SET);
+    fseek(fp, symtab->sh_offset + file_offset, SEEK_SET);
     Elf32_Sym *symbols = malloc(symtab->sh_size);
     if (fread(symbols, symtab->sh_size, 1, fp) != symtab->sh_size)
     {
@@ -133,7 +133,7 @@ void print_symbol_table(FILE* fp, Elf32_Ehdr eh, Elf32_Shdr sh_table[])
     }
 
     // string table
-    fseek(fp, strtab->sh_offset, SEEK_SET);
+    fseek(fp, strtab->sh_offset + file_offset, SEEK_SET);
     char *strtab_data = malloc(strtab->sh_size);
     if (fread(strtab_data, strtab->sh_size, 1, fp) != strtab->sh_size)
     {
@@ -141,24 +141,24 @@ void print_symbol_table(FILE* fp, Elf32_Ehdr eh, Elf32_Shdr sh_table[])
     }
 
     // Print the symbols
-    int num_symbols = symtab->sh_size / symtab->sh_entsize;
-    printf("%d symbols\n", num_symbols);
-    for(int i=0; i< num_symbols; i++) {
-        printf("0x%08x ", symbols[i].st_value);
-        printf("0x%02x ", ELF32_ST_BIND(symbols[i].st_info));
-        printf("0x%02x ", ELF32_ST_TYPE(symbols[i].st_info));
-        printf("%s\n", (strtab_data + symbols[i].st_name));
-    }
+    // int num_symbols = symtab->sh_size / symtab->sh_entsize;
+    // printf("%d symbols\n", num_symbols);
+    // for(int i=0; i< num_symbols; i++) {
+    //     printf("0x%08x ", symbols[i].st_value);
+    //     printf("0x%02x ", ELF32_ST_BIND(symbols[i].st_info));
+    //     printf("0x%02x ", ELF32_ST_TYPE(symbols[i].st_info));
+    //     printf("%s\n", (strtab_data + symbols[i].st_name));
+    // }
 
     free(symbols);
     free(strtab_data);
     free(shstrtab);
 }
 
-void init_record_func_symbol_table(FILE* fp, Elf32_Ehdr eh, Elf32_Shdr sh_table[])
+void add_record_func_symbol_table(FILE* fp, Elf32_Ehdr eh, Elf32_Shdr sh_table[], int file_offset)
 {
     // seek to the section-header string-table
-    fseek(fp, sh_table[eh.e_shstrndx].sh_offset, SEEK_SET);
+    fseek(fp, sh_table[eh.e_shstrndx].sh_offset + file_offset, SEEK_SET);
     char *shstrtab = malloc(sh_table[eh.e_shstrndx].sh_size);
     if (fread(shstrtab, sh_table[eh.e_shstrndx].sh_size, 1, fp) != sh_table[eh.e_shstrndx].sh_size)
     {
@@ -177,7 +177,7 @@ void init_record_func_symbol_table(FILE* fp, Elf32_Ehdr eh, Elf32_Shdr sh_table[
     }
 
     // symbol table
-    fseek(fp, symtab->sh_offset, SEEK_SET);
+    fseek(fp, symtab->sh_offset + file_offset, SEEK_SET);
     Elf32_Sym *symbols = malloc(symtab->sh_size);
     if (fread(symbols, symtab->sh_size, 1, fp) != symtab->sh_size)
     {
@@ -185,7 +185,7 @@ void init_record_func_symbol_table(FILE* fp, Elf32_Ehdr eh, Elf32_Shdr sh_table[
     }
 
     // string table
-    fseek(fp, strtab->sh_offset, SEEK_SET);
+    fseek(fp, strtab->sh_offset + file_offset, SEEK_SET);
     char *strtab_data = malloc(strtab->sh_size);
 
     if (fread(strtab_data, strtab->sh_size, 1, fp) != strtab->sh_size)
@@ -270,4 +270,42 @@ void log_ftrace(bool is_func_call, vaddr_t current_pc, vaddr_t next_pc)
     }
     int index = find_record_func_sym(next_pc);
     log_write("[%s@"FMT_WORD"]\n", index < 0 ? "???" : RECORD_FUN_SYM[index].st_name, next_pc);
+}
+
+void load_user_elf(char* file_name, int file_offset) {
+    Elf32_Ehdr eh;		/* elf-header is fixed size */
+    // try to load ramdisk file
+    FILE *fp = fopen(file_name, "rb");
+    if (fp == NULL) {
+        Log("Can't read the ramdisk image file just return");
+        return;
+    }
+
+    read_elf_header(fp, &eh, file_offset);
+    if(!is_ELF(eh)) {
+        Log("Not a right elf file, just return %s", file_name);
+        fclose(fp);
+        return;
+    }
+
+    if (is64BitELF(eh))
+    {
+        TODO();
+    }
+    else
+    {
+        /* section-header table is variable size */
+        Elf32_Shdr* sh_tbl = malloc(sizeof(Elf32_Shdr) * eh.e_shnum);
+        if(!sh_tbl) {
+            panic("Failed to allocate %d bytes\n", (eh.e_shentsize * eh.e_shnum));
+        }
+        read_section_header_table(fp, eh, sh_tbl, file_offset);
+        print_section_headers(fp, eh, sh_tbl, file_offset);
+        print_symbol_table(fp, eh, sh_tbl, file_offset);
+        add_record_func_symbol_table(fp, eh, sh_tbl, file_offset);
+        free(sh_tbl);
+    }
+
+    // clean up
+    fclose(fp);
 }

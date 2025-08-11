@@ -80,7 +80,7 @@ void init_ftrace()
   FILE *fp = fopen(elf_file, "rb");
   Assert(fp, "Can not open '%s'", elf_file);
 
-  read_elf_header(fp, &eh);
+  read_elf_header(fp, &eh, 0);
   if(!is_ELF(eh)) {
     Log("Not a right elf file, just return %s", elf_file);
     fclose(fp);
@@ -98,10 +98,10 @@ void init_ftrace()
     if(!sh_tbl) {
       panic("Failed to allocate %d bytes\n", (eh.e_shentsize * eh.e_shnum));
     }
-      read_section_header_table(fp, eh, sh_tbl);
-      print_section_headers(fp, eh, sh_tbl);
-      print_symbol_table(fp, eh, sh_tbl);
-      init_record_func_symbol_table(fp, eh, sh_tbl);
+      read_section_header_table(fp, eh, sh_tbl, 0);
+      print_section_headers(fp, eh, sh_tbl, 0);
+      print_symbol_table(fp, eh, sh_tbl, 0);
+      add_record_func_symbol_table(fp, eh, sh_tbl, 0);
       free(sh_tbl);
   }
 

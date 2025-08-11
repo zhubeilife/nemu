@@ -222,6 +222,35 @@ static int cmd_attach(char *args) {
   return 0;
 }
 
+void load_user_elf(char* file_name, int file_offset);
+static int cmd_ftrace(char *args) {
+  /* extract the first argument */
+
+  char *arg_filename = strtok(NULL, " ");
+  if (arg_filename == NULL)
+  {
+    printf("Please Give file path and offset\n");
+    return 0;
+  }
+
+  char *arg_size = strtok(NULL, " ");
+  if (arg_size == NULL)
+  {
+    printf("Please Give file path and offset\n");
+    return 0;
+  }
+  int size = atoi(arg_size);
+  if (size <= 0)
+  {
+    printf("Please Give right size\n");
+    return 0;
+  }
+
+  Log("Load user elf: %s with offset: %d", arg_filename, size);
+  load_user_elf(arg_filename, size);
+  return 0;
+}
+
 // 比较暴力的直接把cpu和内存的都给保存下来了
 // TODO未经过测试
 static int cmd_save(char *args) {
@@ -346,6 +375,7 @@ static struct {
   { "attach", "open Diff Test", cmd_attach },
   { "save", "save current status", cmd_save },
   { "load", "load save status", cmd_load },
+  { "ft", "load user functionn elf", cmd_ftrace },
 };
 
 #define NR_CMD ARRLEN(cmd_table)

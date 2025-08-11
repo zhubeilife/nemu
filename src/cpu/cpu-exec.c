@@ -61,8 +61,12 @@ bool check_wp_value_chage(word_t * old_value, word_t *change_value);
 
 static void trace_and_difftest(Decode *_this, vaddr_t dnpc) {
 #ifdef CONFIG_ITRACE_COND
+#ifdef CONFIG_ITRACE_RINGBUF_ONLU
+  if (ITRACE_COND) { ringbuf_push(_this->logbuf); }
+#else
   if (ITRACE_COND) { log_write("%s\n", _this->logbuf); }
   if (ITRACE_COND) { ringbuf_push(_this->logbuf); }
+#endif
 #endif
   if (g_print_step) { IFDEF(CONFIG_ITRACE, puts(_this->logbuf)); }
   IFDEF(CONFIG_DIFFTEST, difftest_step(_this->pc, dnpc));
