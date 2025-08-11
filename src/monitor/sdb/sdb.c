@@ -375,7 +375,7 @@ static struct {
   { "attach", "open Diff Test", cmd_attach },
   { "save", "save current status", cmd_save },
   { "load", "load save status", cmd_load },
-  { "ft", "load user functionn elf", cmd_ftrace },
+  { "ft", "load user function elf", cmd_ftrace },
 };
 
 #define NR_CMD ARRLEN(cmd_table)
