@@ -371,7 +371,7 @@ word_t eval(int p, int q, bool *success)
         {
           if (in_pmem(addr))
           {
-            return paddr_read(addr, 1);
+            return paddr_read(addr, 4);
           }
           else
           {

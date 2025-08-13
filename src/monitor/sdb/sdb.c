@@ -152,7 +152,7 @@ static int cmd_p(char *args) {
   bool ret;
   word_t result = expr(args, &ret);
 
-  printf("Result: %u\n", result);
+  printf("Result hex: %x dec: %d\n", result, result);
   return 0;
 
 #else
