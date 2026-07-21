@@ -27,6 +27,10 @@ SRCS-BLACKLIST-$(CONFIG_TARGET_AM) += src/device/alarm.c
 
 ifdef CONFIG_DEVICE
 ifndef CONFIG_TARGET_AM
+# device sources include <SDL2/SDL.h>, so we need the SDL2 dir's parent on
+# the include path, not the SDL2 dir itself (which is what sdl2-config
+# --cflags gives, for the <SDL.h> include convention).
+CFLAGS += -I$(shell sdl2-config --prefix)/include
 LIBS += $(shell sdl2-config --libs)
 endif
 endif
