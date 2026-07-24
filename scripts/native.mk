@@ -47,6 +47,10 @@ gdb: run-env
 	$(call git_commit, "gdb NEMU")
 	gdb -s $(BINARY) --args $(NEMU_EXEC)
 
+lldb: run-env
+	$(call git_commit, "lldb NEMU")
+	lldb -- $(NEMU_EXEC)
+
 cgdb: run-env
 	$(call git_commit, "gdb NEMU")
 	cgdb -s $(BINARY) --args $(NEMU_EXEC)
@@ -57,4 +61,4 @@ $(clean-tools):
 clean-tools: $(clean-tools)
 clean-all: clean distclean clean-tools
 
-.PHONY: run gdb run-env clean-tools clean-all $(clean-tools)
+.PHONY: run gdb lldb run-env clean-tools clean-all $(clean-tools)
