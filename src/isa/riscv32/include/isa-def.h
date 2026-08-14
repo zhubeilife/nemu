@@ -65,10 +65,11 @@ typedef union {
 
 // CSR Control and Status Register
 typedef struct {
-  mstatus_t mstatus;   // 0x0300
-  word_t mtvec;     // 0x0305
-  word_t mepc;      // 0x0341
-  word_t mcause;    // 0x0342
+  mstatus_t mstatus;    // 0x0300
+  word_t mtvec;         // 0x0305
+  word_t mepc;          // 0x0341
+  word_t mcause;        // 0x0342
+  word_t satp;
 }csr_t;
 
 typedef struct {
@@ -82,6 +83,7 @@ typedef struct {
   uint32_t inst;
 } MUXDEF(CONFIG_RV64, riscv64_ISADecodeInfo, riscv32_ISADecodeInfo);
 
-#define isa_mmu_check(vaddr, len, type) (MMU_DIRECT)
+int isa_mmu_check(vaddr_t vaddr, int len, int type);
+// #define isa_mmu_check(vaddr, len, type) (MMU_DIRECT)
 
 #endif

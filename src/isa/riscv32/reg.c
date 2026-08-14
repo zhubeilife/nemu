@@ -56,6 +56,7 @@ void isa_reg_display() {
   printf("(%7s: " FMT_WORD  " )  ", "mtvec",   cpu.csr.mtvec);
   printf("(%7s: " FMT_WORD  " )  ", "mepc",    cpu.csr.mepc);
   printf("(%7s: " FMT_WORD  " )  ", "mcause",  cpu.csr.mcause);
+  printf("(%7s: " FMT_WORD  " )  ", "satp",    cpu.csr.satp);
   printf("\n");
 }
 
@@ -96,6 +97,10 @@ word_t isa_reg_str2val(const char *name, bool *success) {
     *success = true;
     return cpu.csr.mcause;
   }
-
+  if (strcmp(name, "satp") == 0)
+  {
+    *success = true;
+    return cpu.csr.satp;
+  }
   return 0;
 }
